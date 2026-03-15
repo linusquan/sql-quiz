@@ -1,0 +1,285 @@
+{
+  "meta": {
+    "title": "JavaScript & Web Fundamentals",
+    "subtitle": "Entry-Level Interview Prep · 18 Questions",
+    "sections": [
+      { "id": "types",    "label": "Section 1 — Variables & Types",     "qs": [0,1,2,3,4] },
+      { "id": "functions","label": "Section 2 — Functions",             "qs": [5,6] },
+      { "id": "oop",      "label": "Section 3 — OOP Concepts",          "qs": [7] },
+      { "id": "control",  "label": "Section 4 — Control Flow",          "qs": [8,9,10] },
+      { "id": "web",      "label": "Section 5 — Cloud & Web Support",   "qs": [11,12,13,14,15,16,17] }
+    ]
+  },
+  "questions": [
+
+    {
+      "n": 1,
+      "section": "types",
+      "type": "mcq",
+      "tags": ["Variables & Types", "MCQ"],
+      "text": "What is the key difference between <code>let</code> and <code>const</code> in JavaScript?",
+      "opts": [
+        "<code>let</code> is block-scoped; <code>const</code> is function-scoped.",
+        "<code>let</code> can be reassigned; <code>const</code> cannot be reassigned after declaration.",
+        "<code>const</code> variables are always faster to access.",
+        "There is no difference — they are interchangeable."
+      ],
+      "answer": 1,
+      "exp": "<strong><code>var</code></strong> — the old way. Function-scoped, can be re-declared, has hoisting behaviour that causes subtle bugs. Avoid it in modern JavaScript.<br><br><strong><code>let</code></strong> — block-scoped, can be reassigned but not re-declared in the same scope.<br><br><strong><code>const</code></strong> — block-scoped, the <em>binding</em> cannot be reassigned after declaration. Important: if a <code>const</code> holds an object or array, the <em>contents</em> can still be changed — only the variable reference is locked.<br><br>Rule of thumb: default to <code>const</code>, use <code>let</code> when you know the value will change, never use <code>var</code>."
+    },
+
+    {
+      "n": 2,
+      "section": "types",
+      "type": "mcq",
+      "tags": ["Variables & Types", "MCQ"],
+      "text": "JavaScript is described as 'dynamically typed.' Which statement best explains what this means?",
+      "opts": [
+        "JavaScript runs faster than statically typed languages.",
+        "Variable types are declared upfront and checked by a compiler before the code runs.",
+        "A variable has no declared type — its type is determined at runtime by the value it holds.",
+        "JavaScript automatically converts all values to strings."
+      ],
+      "answer": 2,
+      "exp": "In a <strong>statically typed</strong> language like C#, you declare the type when you create a variable: <code>int age = 25</code>. The compiler checks types at build time and rejects mismatches before the code ever runs.<br><br>In a <strong>dynamically typed</strong> language like JavaScript, you write <code>let age = 25</code> — no declared type. The same variable can later be reassigned to a string or boolean with no error. The type is determined at runtime based on whatever value the variable holds at that moment.<br><br>The trade-off: C# catches type errors early and IDE tooling works better. JavaScript is more flexible but type bugs only surface when the code actually runs. TypeScript was built specifically to bring static typing to JavaScript."
+    },
+
+    {
+      "n": 3,
+      "section": "types",
+      "type": "mcq",
+      "tags": ["Variables & Types", "MCQ"],
+      "text": "What does <code>\"5\" + 3</code> evaluate to in JavaScript, and why?",
+      "opts": [
+        "<code>8</code> — JavaScript converts the string to a number.",
+        "<code>\"53\"</code> — JavaScript converts the number to a string and concatenates.",
+        "<code>NaN</code> — mixing types always causes an error.",
+        "<code>undefined</code> — the operation is invalid."
+      ],
+      "answer": 1,
+      "exp": "The result is <strong><code>\"53\"</code></strong> — a string. This is called <strong>type coercion</strong>: JavaScript automatically converts types to make an operation work rather than throwing an error.<br><br>When <code>+</code> sees a string on either side, it treats the whole operation as string concatenation and converts the other operand to a string. So <code>\"5\" + 3</code> becomes <code>\"5\" + \"3\"</code> = <code>\"53\"</code>.<br><br>The reverse is instructive: <code>\"5\" - 3</code> gives <code>2</code>, because <code>-</code> has no string meaning, so JavaScript converts <code>\"5\"</code> to a number instead.<br><br><code>+</code> is the one to watch — it doubles as both addition and concatenation, making it the most common source of coercion bugs."
+    },
+
+    {
+      "n": 4,
+      "section": "types",
+      "type": "mcq",
+      "tags": ["Variables & Types", "MCQ"],
+      "text": "What is the difference between <code>null</code> and <code>undefined</code> in JavaScript?",
+      "opts": [
+        "They are identical — both mean a variable has no value.",
+        "<code>null</code> means a variable was never declared; <code>undefined</code> means it was declared but empty.",
+        "<code>undefined</code> means a variable was declared but never assigned; <code>null</code> is an intentional empty value set by the developer.",
+        "<code>null</code> is a number type; <code>undefined</code> is a string type."
+      ],
+      "answer": 2,
+      "exp": "Both represent the absence of a value, but they come from different places.<br><br><strong><code>undefined</code></strong> — JavaScript sets this automatically when a variable is declared but never assigned a value. It means 'I don't know what this is yet.'<br><br><strong><code>null</code></strong> — a developer explicitly assigns this to signal 'this is deliberately empty.' It means 'I know this is nothing.'<br><br>A practical example: if you look up a user in a database and they don't exist, you might intentionally <code>return null</code>. A variable you forgot to assign is <code>undefined</code> unintentionally.<br><br>One famous quirk: <code>typeof null</code> returns <code>\"object\"</code> — this is a long-standing JavaScript bug that was never fixed for backwards compatibility reasons."
+    },
+
+    {
+      "n": 5,
+      "section": "types",
+      "type": "fitb",
+      "tags": ["Variables & Types", "Fill in the Blank"],
+      "text": "The <code>__________</code> operator returns a string describing the type of a value at runtime — for example, it returns <code>\"number\"</code> for <code>42</code> and <code>\"string\"</code> for <code>\"hello\"</code>.",
+      "answer": "typeof",
+      "alt": ["typeof"],
+      "hint": "A single keyword operator — not a function call",
+      "exp": "<strong><code>typeof</code></strong> is an operator that returns a string describing the type of a value. Common results:<br><br><code>typeof 42</code> → <code>\"number\"</code><br><code>typeof \"hello\"</code> → <code>\"string\"</code><br><code>typeof true</code> → <code>\"boolean\"</code><br><code>typeof undefined</code> → <code>\"undefined\"</code><br><code>typeof {}</code> → <code>\"object\"</code><br><code>typeof []</code> → <code>\"object\"</code> (arrays are objects in JS)<br><code>typeof function(){}</code> → <code>\"function\"</code><br><code>typeof null</code> → <code>\"object\"</code> (the famous bug)<br><br>You'd use it when you need to check what type something is before operating on it — for example, confirming a function parameter is actually a number before doing arithmetic with it."
+    },
+
+    {
+      "n": 6,
+      "section": "functions",
+      "type": "mcq",
+      "tags": ["Functions", "MCQ"],
+      "text": "A function calculates a result but the caller always receives <code>undefined</code>. What is the most likely cause?",
+      "opts": [
+        "The function has too many parameters.",
+        "The function is missing a <code>return</code> statement.",
+        "The variable name is spelled incorrectly.",
+        "JavaScript functions cannot produce values."
+      ],
+      "answer": 1,
+      "exp": "<strong><code>return</code></strong> does two things: it immediately exits the function, and it sends a value back to the caller.<br><br>Without a <code>return</code> statement — or with a bare <code>return</code> — the function still runs to completion but sends back <code>undefined</code>. The calculation happens and then disappears.<br><br>Example of the mistake:<br><code>function add(a, b) { a + b; }</code> — result is lost, caller gets <code>undefined</code><br><br>Correct:<br><code>function add(a, b) { return a + b; }</code><br><br>Once <code>return</code> executes, no further code in that function runs — it exits immediately. A function can only return one value, but that value can be an object or array containing multiple things."
+    },
+
+    {
+      "n": 7,
+      "section": "functions",
+      "type": "mcq",
+      "tags": ["Functions", "MCQ"],
+      "text": "You pass an object to a function and the function modifies one of its properties. Back outside the function, the original object has changed. Why?",
+      "opts": [
+        "JavaScript automatically makes a deep copy of all objects passed to functions.",
+        "Objects are passed by reference — the function receives a pointer to the same object in memory.",
+        "This only happens with <code>const</code> objects.",
+        "Functions always return the modified version of their arguments."
+      ],
+      "answer": 1,
+      "exp": "JavaScript passes values to functions in two different ways depending on the type.<br><br><strong>Primitives</strong> (numbers, strings, booleans) are passed <strong>by value</strong> — the function receives a copy. Changing it inside the function has no effect on the original variable outside.<br><br><strong>Objects and arrays</strong> are passed <strong>by reference</strong> — the function receives a pointer to the same location in memory. If the function modifies a property, the original object is changed too.<br><br>Example:<br><code>function addYear(user) { user.age++; }</code><br><code>const person = { age: 25 };</code><br><code>addYear(person);</code><br><code>console.log(person.age); // 26 — the original changed!</code><br><br>This surprises many beginners. To avoid mutating the original, you'd create a copy first: <code>const copy = { ...user };</code>"
+    },
+
+    {
+      "n": 8,
+      "section": "oop",
+      "type": "mcq",
+      "tags": ["OOP Concepts", "MCQ"],
+      "text": "What is the difference between a class and an object?",
+      "opts": [
+        "A class holds real data; an object is an empty template.",
+        "They are the same thing — 'class' and 'object' are interchangeable terms.",
+        "A class is a blueprint or template; an object is a specific instance created from that blueprint.",
+        "A class can only be used once; an object can be reused many times."
+      ],
+      "answer": 2,
+      "exp": "A <strong>class</strong> is a blueprint — it defines what properties and methods something will have, but holds no actual data itself.<br><br>An <strong>object</strong> is a specific instance created from that blueprint — it holds real values.<br><br>Real-world analogy: a class is like the architectural plans for a house. An object is an actual house built from those plans. You can build many houses (objects) from the same plans (class).<br><br>In JavaScript:<br><code>class Car {</code><br><code>&nbsp;&nbsp;constructor(make) { this.make = make; }</code><br><code>}</code><br><br><code>const myCar = new Car(\"Toyota\");</code> — this creates an object, a specific car with real data.<br><br>A C# developer will find this familiar: classes in C# work the same way conceptually, though JavaScript's underlying mechanism (prototypal inheritance) differs from C#'s classical inheritance."
+    },
+
+    {
+      "n": 9,
+      "section": "control",
+      "type": "mcq",
+      "tags": ["Control Flow", "MCQ"],
+      "text": "In a <code>for</code> loop written as <code>for (let i = 0; i < 4; i++)</code>, how many times does the loop body run?",
+      "opts": ["3 times", "4 times", "5 times", "Infinitely"],
+      "answer": 1,
+      "exp": "The loop body runs <strong>4 times</strong>, with <code>i</code> taking the values 0, 1, 2, and 3.<br><br>A <code>for</code> loop has three parts in the parentheses:<br><br><strong>Initialiser</strong> — runs once before the loop starts: <code>let i = 0</code><br><strong>Condition</strong> — checked before every iteration; loop runs while true, stops when false: <code>i &lt; 4</code><br><strong>Increment</strong> — runs after each iteration: <code>i++</code><br><br>When <code>i</code> reaches 4, the condition <code>i &lt; 4</code> is false, so the loop exits. The body never runs with <code>i = 4</code>.<br><br>Use a <code>for</code> loop when you know in advance how many times something should run. For iterating over an array's elements, <code>for...of</code> is often cleaner. For iterating over an object's keys, use <code>for...in</code>."
+    },
+
+    {
+      "n": 10,
+      "section": "control",
+      "type": "mcq",
+      "tags": ["Control Flow", "MCQ"],
+      "text": "When is a <code>switch</code> statement generally preferred over <code>if/else</code>?",
+      "opts": [
+        "When the condition involves a range or complex boolean expression.",
+        "When you are checking one variable against multiple specific fixed values.",
+        "When you need to run a block of code only once.",
+        "<code>switch</code> is always preferred — it runs faster."
+      ],
+      "answer": 1,
+      "exp": "Both branch code based on conditions, but they serve different use cases.<br><br><strong><code>if/else</code></strong> — flexible, each condition can be any boolean expression including ranges and complex logic. Use it for: <code>if (age > 18 && hasId)</code>, <code>if (score >= 90)</code>, or any condition that isn't a simple exact match.<br><br><strong><code>switch</code></strong> — designed for checking one variable against multiple specific fixed values. It's cleaner and more readable when you have many exact cases. Use it for: mapping a status code to a message, handling different user roles, routing based on a command string.<br><br>Important: <code>switch</code> requires a <code>break</code> statement at the end of each case. Without it, execution 'falls through' into the next case — a common bug.<br><br><code>switch (status) {</code><br><code>&nbsp;&nbsp;case 404: message = 'Not found'; break;</code><br><code>&nbsp;&nbsp;case 500: message = 'Server error'; break;</code><br><code>}</code>"
+    },
+
+    {
+      "n": 11,
+      "section": "control",
+      "type": "mcq",
+      "tags": ["Control Flow", "MCQ"],
+      "text": "What does <code>break</code> do when used inside a <code>for</code> loop?",
+      "opts": [
+        "It skips the current iteration and moves to the next one.",
+        "It pauses the loop for one second.",
+        "It immediately exits the loop entirely, regardless of remaining iterations.",
+        "It resets the loop counter back to zero."
+      ],
+      "answer": 2,
+      "exp": "<strong><code>break</code></strong> immediately exits the loop entirely. No remaining iterations run, and execution jumps to the code after the loop.<br><br>It's useful when you've found what you were looking for and continuing would be wasteful:<br><code>for (let i = 0; i &lt; users.length; i++) {</code><br><code>&nbsp;&nbsp;if (users[i].id === targetId) {</code><br><code>&nbsp;&nbsp;&nbsp;&nbsp;found = users[i];</code><br><code>&nbsp;&nbsp;&nbsp;&nbsp;break; // no point checking the rest</code><br><code>&nbsp;&nbsp;}</code><br><code>}</code><br><br>The related keyword is <strong><code>continue</code></strong> — it skips only the <em>current</em> iteration and moves to the next one, without exiting the loop entirely.<br><br>In a <code>switch</code> statement, <code>break</code> serves a different but related role — preventing execution from falling through into the next case."
+    },
+
+    {
+      "n": 12,
+      "section": "web",
+      "type": "mcq",
+      "tags": ["Cloud & Web", "MCQ"],
+      "text": "What is an API, and how do you consume one from JavaScript in a browser?",
+      "opts": [
+        "An API is a database table — you query it with SQL.",
+        "An API is a defined contract for two systems to communicate; in JavaScript you consume it using <code>fetch()</code> to send HTTP requests and receive JSON responses.",
+        "An API is a JavaScript framework like React or Vue.",
+        "An API is only accessible from server-side languages like C# or Python, not from a browser."
+      ],
+      "answer": 1,
+      "exp": "An <strong>API (Application Programming Interface)</strong> is a defined contract that lets two systems communicate. A web API exposes endpoints — URLs that accept requests and return data, almost always as JSON.<br><br>In JavaScript you consume one using <code>fetch</code>:<br><code>fetch('https://api.example.com/users')</code><br><code>&nbsp;&nbsp;.then(r => r.json())</code><br><code>&nbsp;&nbsp;.then(data => console.log(data));</code><br><br>The browser sends an HTTP request → the server processes it → sends back JSON → your JavaScript reads the data and does something with it.<br><br>In a cloud support role, APIs are everywhere. Customers integrate their applications with cloud services via APIs, and many support issues come down to a misconfigured API call — wrong endpoint, missing auth header, malformed JSON body, or incorrect HTTP method."
+    },
+
+    {
+      "n": 13,
+      "section": "web",
+      "type": "fitb",
+      "tags": ["Cloud & Web", "Fill in the Blank"],
+      "text": "To convert a JSON string received from an API into a usable JavaScript object, you use <code>JSON.__________( )</code>.",
+      "answer": "parse",
+      "alt": ["parse"],
+      "hint": "The opposite operation is JSON.stringify()",
+      "exp": "<strong><code>JSON.parse(str)</code></strong> converts a JSON string into a usable JavaScript object.<br><strong><code>JSON.stringify(obj)</code></strong> converts a JavaScript object into a JSON string — used when sending data to a server.<br><br>JSON (JavaScript Object Notation) is a lightweight text format for transporting structured data. It looks like a JavaScript object but is a plain string. Rules: all keys must be in double quotes, values can be strings, numbers, booleans, arrays, objects, or null — but not functions or <code>undefined</code>.<br><br>Example:<br><code>const str = '{\"name\": \"Alice\", \"age\": 30}';</code><br><code>const user = JSON.parse(str);</code><br><code>console.log(user.name); // \"Alice\"</code><br><br>JSON is the universal language of web APIs — almost every API you'll work with sends and receives JSON."
+    },
+
+    {
+      "n": 14,
+      "section": "web",
+      "type": "mcq",
+      "tags": ["Cloud & Web", "MCQ"],
+      "text": "In a web application, what is the difference between a client and a server?",
+      "opts": [
+        "The client stores the database; the server displays the user interface.",
+        "They are the same machine — 'client' and 'server' are just different names for the same thing.",
+        "The client is the application making the request (e.g. a browser); the server receives the request, processes it, and sends back a response.",
+        "The client is always faster than the server."
+      ],
+      "answer": 2,
+      "exp": "The <strong>client</strong> is the device or application making a request — typically a browser, a mobile app, or a script.<br><br>The <strong>server</strong> is the machine that receives the request, processes it, and sends back a response.<br><br>In web development: the browser (client) requests a webpage → the web server sends back HTML, CSS, and JavaScript.<br><br>In an API context: your JavaScript code (client) calls an endpoint → the backend (server) handles the logic and returns data.<br><br>This distinction is critical in cloud support. When something breaks, the first question is always: is the problem on the <strong>client side</strong> (bad request, missing auth header, wrong data sent, CORS issue) or the <strong>server side</strong> (crash, outage, database error, misconfiguration)? The HTTP status code — 4xx vs 5xx — immediately tells you which side to investigate."
+    },
+
+    {
+      "n": 15,
+      "section": "web",
+      "type": "mcq",
+      "tags": ["Cloud & Web", "MCQ"],
+      "text": "What does HTTP stand for, and what is the key difference between a GET and a POST request?",
+      "opts": [
+        "HyperText Transfer Protocol — GET sends data to the server; POST retrieves data.",
+        "HyperText Transfer Protocol — GET retrieves data without changing server state; POST sends data in the request body to create or submit something.",
+        "High Transfer Text Protocol — GET and POST are identical but GET is faster.",
+        "HyperText Transfer Protocol — GET is for images; POST is for text."
+      ],
+      "answer": 1,
+      "exp": "<strong>HTTP</strong> stands for <strong>HyperText Transfer Protocol</strong> — the rules governing how data is sent between client and server on the web.<br><br><strong>GET</strong> — requests data from the server. Parameters go in the URL. No request body. Should not change anything on the server (read-only). Example: loading a webpage, fetching a list of users.<br><br><strong>POST</strong> — sends data to the server. Payload goes in the request body. Used when creating or submitting something. Example: submitting a form, creating a new record, logging in.<br><br>Analogy: GET is asking a question; POST is handing something in.<br><br>Other methods worth knowing: <strong>PUT</strong> updates an existing resource entirely, <strong>PATCH</strong> partially updates one, <strong>DELETE</strong> removes one. Together these form the basis of REST API design."
+    },
+
+    {
+      "n": 16,
+      "section": "web",
+      "type": "mcq",
+      "tags": ["Cloud & Web", "MCQ"],
+      "text": "A user reports a 404 error. What does this tell you, and how is it different from a 500 error?",
+      "opts": [
+        "Both mean the server crashed — they are interchangeable.",
+        "404 means the request was too large; 500 means the password was wrong.",
+        "404 is a client-side problem — the requested resource doesn't exist at that URL. 500 is a server-side problem — the server failed to process a valid request.",
+        "404 means no internet connection; 500 means the database is full."
+      ],
+      "answer": 2,
+      "exp": "HTTP status codes are grouped by their first digit, which immediately tells you which side has the problem.<br><br><strong>4xx — client-side errors</strong> (the request itself was wrong):<br><code>400</code> Bad Request — server couldn't understand the request, usually malformed data<br><code>401</code> Unauthorized — not authenticated<br><code>403</code> Forbidden — authenticated but no permission<br><code>404</code> Not Found — resource doesn't exist at that URL<br><code>429</code> Too Many Requests — rate limit exceeded<br><br><strong>5xx — server-side errors</strong> (the request was fine but the server failed):<br><code>500</code> Internal Server Error — generic server crash<br><code>502</code> Bad Gateway — upstream server issue<br><code>503</code> Service Unavailable — server is down or overloaded<br><br>In support: 4xx means investigate the client's request. 5xx means investigate the server or cloud infrastructure."
+    },
+
+    {
+      "n": 17,
+      "section": "web",
+      "type": "design",
+      "tags": ["Cloud & Web", "Support Mindset", "Design"],
+      "text": "A user contacts support and says: 'The website is down.' Walk through the questions you would ask first and explain why each one matters.",
+      "answer": "Isolate the scope (everyone or just them?), identify the symptom (error code, blank page, timeout?), check for recent changes, attempt to reproduce, then escalate with evidence.",
+      "exp": "The goal is to <strong>isolate the problem systematically</strong> rather than guessing. Each question eliminates a category of cause.<br><br><strong>'Is it down for everyone or just you?'</strong> — rules out a full outage vs a local issue (ISP, VPN, DNS, device-specific).<br><br><strong>'What exactly are you seeing?'</strong> — a specific error code (404, 500, 503), a blank page, a timeout, or a partial load all point to different problems.<br><br><strong>'What browser and device?'</strong> — rules out a browser-specific bug or a cached broken state (<code>Ctrl+Shift+R</code> hard refresh).<br><br><strong>'Has anything changed recently?'</strong> — new deployment, config change, DNS update, or API key rotation are common causes.<br><br><strong>'Can you reproduce it yourself?'</strong> — reproducing it is the most important step. If you can reproduce it, you can diagnose it.<br><br><strong>In a cloud context add:</strong> is it affecting a specific region? A specific service endpoint? Does the cloud provider have an active incident on their status page?<br><br>Never assume — gather evidence first, then diagnose. Escalate with a clear description of what you found."
+    },
+
+    {
+      "n": 18,
+      "section": "web",
+      "type": "mcq",
+      "tags": ["Cloud & Web", "MCQ"],
+      "text": "Why should API keys and database connection strings be stored as environment variables rather than written directly in the code?",
+      "opts": [
+        "Environment variables load faster than values written in code.",
+        "To keep secrets out of source code (security) and allow the same codebase to behave differently across environments without changing code.",
+        "Because JavaScript cannot read values that are written directly in a file.",
+        "Environment variables are required by all cloud platforms — there is no alternative."
+      ],
+      "answer": 1,
+      "exp": "<strong>Environment variables</strong> are configuration values stored in the server or cloud environment rather than hardcoded in the application's source code.<br><br>Two core reasons to use them:<br><br><strong>1. Security</strong> — if an API key or database password is written in the code and committed to a repository (even a private one), it can be leaked. Environment variables keep secrets out of source control entirely.<br><br><strong>2. Flexibility</strong> — the same codebase can point to a test database in development and a production database in production, simply by changing the environment variable — no code change needed.<br><br>In Node.js: <code>process.env.API_KEY</code><br><br>In cloud platforms like AWS, Azure, or Google Cloud, environment variables are configured per deployment and injected into the running application. A common support issue is a customer who has rotated an API key but forgotten to update the environment variable in their cloud deployment."
+    }
+
+  ]
+}

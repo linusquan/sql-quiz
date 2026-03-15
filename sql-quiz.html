@@ -338,9 +338,16 @@
 let DATA = null;
 let Qs   = [];
 let SECS = [];
-let state = { screen: 'splash', section: 0, answers: {} };
+let QUIZ_FILE = null;
+let state = { screen: 'select', section: 0, answers: {} };
 const KEYS = ['A','B','C','D'];
-const STORAGE_KEY = 'sql-quiz-v1';
+
+const QUIZ_LIST = [
+  { file: 'quiz.json',             title: 'SQL Fundamentals',       subtitle: '40 Questions', color: '#22d3ee' },
+  { file: 'quiz-programming.json', title: 'JavaScript & Web',       subtitle: '18 Questions', color: '#a78bfa' },
+];
+
+function storageKey() { return 'sql-quiz-v1-' + QUIZ_FILE; }
 
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
@@ -349,13 +356,13 @@ function shuffle(arr) {
   }
 }
 function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+  localStorage.setItem(storageKey(), JSON.stringify({
     state, order: SECS.map(s => s.qs)
   }));
 }
 function loadSaved() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(storageKey());
     if (!raw) return false;
     const { state: s, order } = JSON.parse(raw);
     if (!s || s.screen === 'splash') return false;
@@ -366,29 +373,36 @@ function loadSaved() {
 }
 function hasSaved() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(storageKey());
     if (!raw) return false;
     const { state: s } = JSON.parse(raw);
     return s && s.screen !== 'splash' && Object.keys(s.answers || {}).length > 0;
   } catch { return false; }
 }
 
-/* ─── Boot: fetch quiz.json ─────────────────────────────────── */
-async function boot() {
+/* ─── Boot ──────────────────────────────────────────────────── */
+function boot() {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('app').style.display = '';
+  render();
+}
+
+async function selectQuiz(file) {
+  QUIZ_FILE = file;
+  document.getElementById('app').innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:center;min-height:60vh;font-family:var(--mono);font-size:.85rem;color:var(--muted);gap:10px"><div class="spinner"></div>Loading…</div>';
   try {
-    const r = await fetch('quiz.json');
+    const r = await fetch(file);
     if (!r.ok) throw new Error('HTTP ' + r.status);
     DATA = await r.json();
     Qs   = DATA.questions;
     SECS = DATA.meta.sections.map(s => ({ ...s, qs: [...s.qs] }));
   } catch(e) {
-    document.getElementById('loading').innerHTML =
-      '<span style="color:#f87171">Could not load quiz.json — make sure it is in the same folder as this HTML file. (' + e.message + ')</span>';
+    document.getElementById('app').innerHTML =
+      `<div style="padding:2rem;color:#f87171;font-family:var(--mono);font-size:.85rem">Could not load ${file} — ${e.message}</div>`;
     return;
   }
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('app').style.display = '';
-  loadSaved();
+  if (!loadSaved()) state = { screen: 'splash', section: 0, answers: {} };
   render();
 }
 
@@ -400,7 +414,7 @@ function checkFitb(q, val) {
   return [q.answer, ...(q.alt||[])].some(a => norm(val) === norm(a));
 }
 function tagClass(t) {
-  if (/constraint|data/i.test(t))  return 't-con';
+  if (/constraint|data/i.test(t))   return 't-con';
   if (/relational|design/i.test(t)) return 't-des';
   if (/crud/i.test(t))              return 't-cru';
   if (/join/i.test(t))              return 't-joi';
@@ -410,7 +424,7 @@ function calcScore() {
   let c=0, t=0;
   Qs.forEach((q,i) => {
     const a = state.answers[i]; if (!a) return; t++;
-    if (q.type==='mcq'    && a.v===q.answer)        c++;
+    if (q.type==='mcq'    && a.v===q.answer)         c++;
     else if (q.type==='fitb'   && a.checked && a.ok) c++;
     else if (q.type==='design' && a.revealed)        c++;
   });
@@ -420,27 +434,64 @@ function calcScore() {
 /* ─── Render dispatcher ─────────────────────────────────────── */
 function render() {
   const app = document.getElementById('app');
+  if (state.screen==='select')  { app.innerHTML = renderSelect();  return; }
   if (state.screen==='splash')  { app.innerHTML = renderSplash();  return; }
   if (state.screen==='results') { app.innerHTML = renderResults(); return; }
   app.innerHTML = renderQuiz();
 }
 
+/* ─── Select ────────────────────────────────────────────────── */
+function renderSelect() {
+  const cards = QUIZ_LIST.map(q => {
+    const saved = (() => {
+      try {
+        const raw = localStorage.getItem('sql-quiz-v1-' + q.file);
+        if (!raw) return false;
+        const { state: s } = JSON.parse(raw);
+        return s && s.screen !== 'splash' && Object.keys(s.answers||{}).length > 0;
+      } catch { return false; }
+    })();
+    return `<div class="card" style="cursor:pointer;flex:1;min-width:220px;transition:border-color .2s,transform .15s"
+         onclick="selectQuiz('${q.file}')"
+         onmouseover="this.style.borderColor='${q.color}';this.style.transform='translateY(-3px)'"
+         onmouseout="this.style.borderColor='';this.style.transform=''">
+      <div style="display:flex;align-items:center;gap:9px;margin-bottom:.75rem">
+        <div style="width:28px;height:28px;border-radius:6px;background:${q.color}22;border:1px solid ${q.color}44;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.78rem;font-weight:600;color:${q.color}">${q.title[0]}</div>
+        <span style="font-family:var(--mono);font-size:.95rem;font-weight:600">${q.title}</span>
+      </div>
+      <div style="font-size:.78rem;color:var(--muted);margin-bottom:.9rem">${q.subtitle}</div>
+      <div style="font-family:var(--mono);font-size:.78rem;color:${q.color}">${saved ? 'Continue →' : 'Start →'}</div>
+    </div>`;
+  }).join('');
+  return `
+  <div class="header">
+    <div class="logo"><div class="logo-box">S</div>Interview Quiz</div>
+  </div>
+  <div class="splash">
+    <div class="splash-eye">Entry-Level Interview Prep</div>
+    <h1 class="splash-h">Choose your <em>topic</em>.</h1>
+    <p class="splash-p">Select a quiz to start practising. Your progress for each quiz is saved automatically.</p>
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:.5rem">${cards}</div>
+  </div>`;
+}
+
 /* ─── Splash ────────────────────────────────────────────────── */
 function renderSplash() {
   const m = DATA.meta;
-  const COL = {constraints:'#a78bfa', design:'#3ddc84', crud:'#f59e0b', joins:'#22d3ee'};
+  const COL = {constraints:'#a78bfa',design:'#3ddc84',crud:'#f59e0b',joins:'#22d3ee',types:'#22d3ee',functions:'#3ddc84',oop:'#a78bfa',control:'#f59e0b',web:'#f87171'};
   const chips = SECS.map(s => {
     const lbl = s.label.split('—')[1]?.trim() || s.label;
     return `<div class="chip"><span class="dot" style="background:${COL[s.id]||'#80809a'}"></span>${lbl}</div>`;
   }).join('');
+  const sectionNames = SECS.map(s => s.label.split('—')[1]?.trim() || s.label).join(', ');
   return `
   <div class="header">
     <div class="logo"><div class="logo-box">S</div>${m.title}</div>
   </div>
   <div class="splash">
     <div class="splash-eye">Entry-Level Interview Prep</div>
-    <h1 class="splash-h">Master <em>SQL</em><br>fundamentals.</h1>
-    <p class="splash-p">${m.subtitle} — covering constraints, relational design, CRUD operations, and JOINs with detailed explanations for every answer.</p>
+    <h1 class="splash-h">Master the<br><em>fundamentals</em>.</h1>
+    <p class="splash-p">${m.subtitle} — covering ${sectionNames}.</p>
     <div class="splash-chips">${chips}</div>
     ${hasSaved()
       ? `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
@@ -448,6 +499,7 @@ function renderSplash() {
            <button class="start-btn" style="background:var(--s2);border:1px solid var(--border2);color:var(--muted);font-weight:500" onclick="startQuiz()">Start fresh</button>
          </div>`
       : `<button class="start-btn" onclick="startQuiz()">Start quiz →</button>`}
+    <button style="margin-top:1rem;background:none;border:none;color:var(--muted);font-size:.78rem;font-family:var(--mono);cursor:pointer;padding:4px 0;letter-spacing:.04em" onclick="goSelect()">← All quizzes</button>
   </div>`;
 }
 
@@ -460,7 +512,7 @@ function renderQuiz() {
 
   let html = `
   <div class="header">
-    <div class="logo"><div class="logo-box">S</div>SQL Quiz</div>
+    <div class="logo"><div class="logo-box">S</div>${DATA.meta.title}</div>
     <div class="hdr-pills">
       <div class="hdr-pill">Score <span>${c}/${t}</span></div>
       <div class="hdr-pill">${done}/${Qs.length} answered</div>
@@ -573,7 +625,7 @@ function renderResults() {
 
   return `<div class="results">
   <div class="header">
-    <div class="logo"><div class="logo-box">S</div>SQL Quiz</div>
+    <div class="logo"><div class="logo-box">S</div>${DATA.meta.title}</div>
   </div>
   <div class="res-hero">
     <div class="ring-wrap">
@@ -588,8 +640,9 @@ function renderResults() {
     <div class="res-sub">${c} of ${t} questions answered correctly</div>
   </div>
   <div class="res-grid">${cells}</div>
-  <div style="text-align:center">
+  <div style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:.75rem">
     <button class="restart-btn" onclick="doRestart()">↺ Restart quiz</button>
+    <button style="background:none;border:none;color:var(--muted);font-size:.78rem;font-family:var(--mono);cursor:pointer;padding:4px 0;letter-spacing:.04em" onclick="goSelect()">← All quizzes</button>
   </div>
   </div>`;
 }
@@ -602,10 +655,11 @@ function startQuiz() {
   saveState(); render(); scrollTo(0,0);
 }
 function continueQuiz() { render(); scrollTo(0,0); }
+function goSelect()   { state = { screen: 'select', section: 0, answers: {} }; render(); scrollTo(0,0); }
 function nextSec()    { state.section++; saveState(); render(); scrollTo(0,0); }
 function prevSec()    { state.section--; saveState(); render(); scrollTo(0,0); }
 function showResults(){ state.screen='results'; saveState(); render(); scrollTo(0,0); }
-function doRestart()  { localStorage.removeItem(STORAGE_KEY); state={screen:'splash',section:0,answers:{}}; render(); scrollTo(0,0); }
+function doRestart()  { localStorage.removeItem(storageKey()); state={screen:'splash',section:0,answers:{}}; render(); scrollTo(0,0); }
 
 function pickMCQ(qi,v) {
   if (state.answers[qi]) return;
