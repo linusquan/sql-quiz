@@ -635,7 +635,8 @@ function renderResults() {
   </div>
   <div class="res-grid">${cells}</div>
   <div style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:.75rem">
-    <button class="restart-btn" onclick="doRestart()">↺ Restart quiz</button>
+    <button class="restart-btn" onclick="backToQuiz()">← Continue quiz</button>
+    <button class="restart-btn" style="background:var(--s2);border:1px solid var(--border2);color:var(--muted)" onclick="doRestart()">↺ Restart quiz</button>
     <button style="background:none;border:none;color:var(--muted);font-size:.78rem;font-family:var(--mono);cursor:pointer;padding:4px 0;letter-spacing:.04em" onclick="goSelect()">← All quizzes</button>
   </div>
   </div>`;
@@ -648,6 +649,7 @@ function startQuiz() {
   saveState(); render(); scrollTo(0,0);
 }
 function continueQuiz() { render(); scrollTo(0,0); }
+function backToQuiz() { state.screen='quiz'; render(); scrollTo(0,0); }
 function goSelect()   { state = { screen: 'select', section: 0, answers: {} }; render(); scrollTo(0,0); }
 function nextSec()    { state.section++; saveState(); render(); scrollTo(0,0); }
 function prevSec()    { state.section--; saveState(); render(); scrollTo(0,0); }
