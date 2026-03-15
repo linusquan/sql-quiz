@@ -592,7 +592,7 @@ function renderQuiz() {
     <span class="sec-pip">${state.section+1} / ${SECS.length}</span>
     ${isLast
       ? `<button class="nav-btn pri" onclick="showResults()">View results →</button>`
-      : `<button class="nav-btn pri" ${secDone?'':'disabled'} onclick="nextSec()">Next section →</button>`}
+      : `<button class="nav-btn pri" onclick="nextSec()">Next section →</button>`}
   </div></div>`;
 
   return html;
