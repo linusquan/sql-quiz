@@ -340,6 +340,38 @@ let Qs   = [];
 let SECS = [];
 let state = { screen: 'splash', section: 0, answers: {} };
 const KEYS = ['A','B','C','D'];
+const STORAGE_KEY = 'sql-quiz-v1';
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    state, order: SECS.map(s => s.qs)
+  }));
+}
+function loadSaved() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const { state: s, order } = JSON.parse(raw);
+    if (!s || s.screen === 'splash') return false;
+    state = s;
+    order.forEach((qs, i) => { if (SECS[i]) SECS[i].qs = qs; });
+    return true;
+  } catch { return false; }
+}
+function hasSaved() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const { state: s } = JSON.parse(raw);
+    return s && s.screen !== 'splash' && Object.keys(s.answers || {}).length > 0;
+  } catch { return false; }
+}
 
 /* ─── Boot: fetch quiz.json ─────────────────────────────────── */
 async function boot() {
@@ -348,7 +380,7 @@ async function boot() {
     if (!r.ok) throw new Error('HTTP ' + r.status);
     DATA = await r.json();
     Qs   = DATA.questions;
-    SECS = DATA.meta.sections;
+    SECS = DATA.meta.sections.map(s => ({ ...s, qs: [...s.qs] }));
   } catch(e) {
     document.getElementById('loading').innerHTML =
       '<span style="color:#f87171">Could not load quiz.json — make sure it is in the same folder as this HTML file. (' + e.message + ')</span>';
@@ -356,6 +388,7 @@ async function boot() {
   }
   document.getElementById('loading').style.display = 'none';
   document.getElementById('app').style.display = '';
+  loadSaved();
   render();
 }
 
@@ -409,7 +442,12 @@ function renderSplash() {
     <h1 class="splash-h">Master <em>SQL</em><br>fundamentals.</h1>
     <p class="splash-p">${m.subtitle} — covering constraints, relational design, CRUD operations, and JOINs with detailed explanations for every answer.</p>
     <div class="splash-chips">${chips}</div>
-    <button class="start-btn" onclick="startQuiz()">Start quiz →</button>
+    ${hasSaved()
+      ? `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+           <button class="start-btn" onclick="continueQuiz()">Continue →</button>
+           <button class="start-btn" style="background:var(--s2);border:1px solid var(--border2);color:var(--muted);font-weight:500" onclick="startQuiz()">Start fresh</button>
+         </div>`
+      : `<button class="start-btn" onclick="startQuiz()">Start quiz →</button>`}
   </div>`;
 }
 
@@ -556,32 +594,39 @@ function renderResults() {
 }
 
 /* ─── Handlers ──────────────────────────────────────────────── */
-function startQuiz()  { state={screen:'quiz',section:0,answers:{}}; render(); scrollTo(0,0); }
-function nextSec()    { state.section++; render(); scrollTo(0,0); }
-function prevSec()    { state.section--; render(); scrollTo(0,0); }
-function showResults(){ state.screen='results'; render(); scrollTo(0,0); }
-function doRestart()  { state={screen:'quiz',section:0,answers:{}}; render(); scrollTo(0,0); }
+function startQuiz() {
+  SECS = DATA.meta.sections.map(s => ({ ...s, qs: [...s.qs] }));
+  SECS.forEach(s => shuffle(s.qs));
+  state = { screen: 'quiz', section: 0, answers: {} };
+  saveState(); render(); scrollTo(0,0);
+}
+function continueQuiz() { render(); scrollTo(0,0); }
+function nextSec()    { state.section++; saveState(); render(); scrollTo(0,0); }
+function prevSec()    { state.section--; saveState(); render(); scrollTo(0,0); }
+function showResults(){ state.screen='results'; saveState(); render(); scrollTo(0,0); }
+function doRestart()  { localStorage.removeItem(STORAGE_KEY); state={screen:'splash',section:0,answers:{}}; render(); scrollTo(0,0); }
 
 function pickMCQ(qi,v) {
   if (state.answers[qi]) return;
   state.answers[qi]={v, ok:v===Qs[qi].answer};
-  render();
+  saveState(); render();
 }
 function submitFitb(qi) {
   const inp=document.getElementById('fi'+qi);
   if (!inp||state.answers[qi]?.checked) return;
   const val=inp.value;
   state.answers[qi]={val, checked:true, ok:checkFitb(Qs[qi],val)};
-  render();
+  saveState(); render();
 }
 function saveDraft(qi,val) {
   if (!state.answers[qi]) state.answers[qi]={};
   state.answers[qi].draft=val;
+  saveState();
 }
 function doReveal(qi) {
   const ta=document.getElementById('dt'+qi);
   state.answers[qi]={draft:ta?ta.value:(state.answers[qi]?.draft||''), revealed:true};
-  render();
+  saveState(); render();
 }
 
 boot();
