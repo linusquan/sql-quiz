@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL Fundamentals Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #0c0c0e;
+    --s1:       #131318;
+    --s2:       #1a1a22;
+    --s3:       #22222c;
+    --border:   rgba(255,255,255,0.07);
+    --border2:  rgba(255,255,255,0.13);
+    --text:     #eeeef2;
+    --muted:    #80809a;
+    --dim:      #464660;
+    --green:    #3ddc84;
+    --green-d:  rgba(61,220,132,0.12);
+    --cyan:     #22d3ee;
+    --cyan-d:   rgba(34,211,238,0.10);
+    --amber:    #f59e0b;
+    --amber-d:  rgba(245,158,11,0.10);
+    --red:      #f87171;
+    --red-d:    rgba(248,113,113,0.10);
+    --purple:   #a78bfa;
+    --purple-d: rgba(167,139,250,0.10);
+    --r:        7px;
+    --r-lg:     12px;
+    --mono:     'IBM Plex Mono', monospace;
+    --sans:     'IBM Plex Sans', sans-serif;
+  }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      linear-gradient(rgba(61,220,132,.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(61,220,132,.018) 1px, transparent 1px);
+    background-size: 52px 52px;
+  }
+
+  .app { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; padding: 2rem 1.25rem 6rem; }
+
+  /* Loading */
+  #loading {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; font-family: var(--mono); font-size: .85rem;
+    color: var(--muted); gap: 10px;
+  }
+  .spinner {
+    width: 18px; height: 18px; border: 2px solid var(--s3);
+    border-top-color: var(--green); border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Header */
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 1.25rem; margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    display: flex; align-items: center; gap: 9px;
+    font-family: var(--mono); font-size: 1rem; font-weight: 600;
+    color: var(--green); letter-spacing: -.02em;
+  }
+  .logo-box {
+    width: 28px; height: 28px; border-radius: 6px;
+    background: var(--green-d); border: 1px solid rgba(61,220,132,.22);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .78rem; color: var(--green);
+  }
+  .hdr-pills { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .hdr-pill {
+    font-family: var(--mono); font-size: .72rem; color: var(--muted);
+    background: var(--s2); border: 1px solid var(--border);
+    border-radius: 20px; padding: 4px 12px; letter-spacing: .04em; white-space: nowrap;
+  }
+  .hdr-pill span { color: var(--green); font-weight: 500; }
+
+  /* Progress */
+  .prog-wrap { margin-bottom: 2rem; }
+  .prog-meta {
+    display: flex; justify-content: space-between;
+    font-family: var(--mono); font-size: .71rem; color: var(--muted); margin-bottom: 8px;
+  }
+  .prog-track { height: 3px; background: var(--s3); border-radius: 2px; overflow: hidden; }
+  .prog-fill {
+    height: 100%; border-radius: 2px;
+    background: linear-gradient(90deg, var(--green), var(--cyan));
+    transition: width .4s ease;
+  }
+
+  /* Section label */
+  .sec-label {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--mono); font-size: .7rem; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--muted);
+    margin-top: 2.25rem; margin-bottom: 1.25rem;
+  }
+  .sec-label:first-of-type { margin-top: 0; }
+  .sec-label::after { content:''; flex:1; height:1px; background: var(--border); }
+
+  /* Card */
+  .card {
+    background: var(--s1); border: 1px solid var(--border);
+    border-radius: var(--r-lg); padding: 1.6rem;
+    margin-bottom: 1rem; position: relative;
+    transition: border-color .2s;
+  }
+  .card.ok  { border-color: rgba(61,220,132,.3); }
+  .card.bad { border-color: rgba(248,113,113,.3); }
+
+  .card-hdr { display: flex; align-items: flex-start; gap: 9px; margin-bottom: 1.1rem; }
+  .q-num {
+    font-family: var(--mono); font-size: .68rem; color: var(--dim);
+    background: var(--s2); border: 1px solid var(--border);
+    border-radius: 4px; padding: 2px 7px; white-space: nowrap;
+    margin-top: 2px; flex-shrink: 0;
+  }
+  .tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .tag {
+    font-family: var(--mono); font-size: .63rem; letter-spacing: .06em;
+    padding: 2px 8px; border-radius: 20px; font-weight: 500; white-space: nowrap;
+  }
+  .t-con  { background: var(--purple-d); color: var(--purple); }
+  .t-des  { background: var(--green-d);  color: var(--green); }
+  .t-cru  { background: var(--amber-d);  color: var(--amber); }
+  .t-joi  { background: var(--cyan-d);   color: var(--cyan); }
+  .t-typ  { background: var(--s2); color: var(--muted); border: 1px solid var(--border); }
+
+  .q-text { font-size: .95rem; color: var(--text); line-height: 1.68; margin-bottom: 1.1rem; }
+  .q-text code {
+    font-family: var(--mono); font-size: .82em;
+    background: var(--s3); padding: 1px 5px; border-radius: 3px; color: var(--cyan);
+  }
+
+  .res-badge {
+    position: absolute; top: 1.1rem; right: 1.1rem;
+    width: 22px; height: 22px; border-radius: 50%;
+    display: none; align-items: center; justify-content: center; font-size: 11px;
+  }
+  .res-badge.ok  { display:flex; background: rgba(61,220,132,.15);  color: var(--green); }
+  .res-badge.bad { display:flex; background: rgba(248,113,113,.12); color: var(--red); }
+  .res-badge.des { display:flex; background: rgba(34,211,238,.1);   color: var(--cyan); }
+
+  /* MCQ */
+  .opts { display: flex; flex-direction: column; gap: 7px; }
+  .opt {
+    background: var(--s2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 14px; font-size: .875rem;
+    color: var(--text); cursor: pointer; text-align: left; font-family: var(--sans);
+    display: flex; align-items: flex-start; gap: 10px; line-height: 1.5;
+    transition: border-color .13s, background .13s, transform .1s;
+  }
+  .opt:hover:not([disabled]) { border-color: var(--border2); background: var(--s3); transform: translateX(2px); }
+  .opt-k {
+    font-family: var(--mono); font-size: .68rem; color: var(--dim);
+    background: var(--s3); border: 1px solid var(--border);
+    border-radius: 3px; padding: 1px 6px; flex-shrink: 0; margin-top: 2px;
+    transition: background .13s, color .13s;
+  }
+  .opt.is-correct { background: var(--green-d); border-color: rgba(61,220,132,.45); color: var(--green); }
+  .opt.is-correct .opt-k { background: rgba(61,220,132,.15); color: var(--green); border-color: rgba(61,220,132,.3); }
+  .opt.is-wrong   { background: var(--red-d); border-color: rgba(248,113,113,.4); color: var(--red); }
+  .opt.is-wrong   .opt-k { background: rgba(248,113,113,.15); color: var(--red); border-color: rgba(248,113,113,.3); }
+
+  /* FITB */
+  .fitb-row { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+  .fitb-in {
+    font-family: var(--mono); font-size: .88rem;
+    background: var(--s2); border: 1px solid var(--border2);
+    border-radius: 7px; padding: 8px 13px; color: var(--text);
+    outline: none; min-width: 190px; transition: border-color .13s;
+  }
+  .fitb-in::placeholder { color: var(--dim); }
+  .fitb-in:focus { border-color: var(--cyan); }
+  .fitb-in.ok  { border-color: var(--green); color: var(--green); }
+  .fitb-in.bad { border-color: var(--red);   color: var(--red); }
+  .fitb-hint { font-family: var(--mono); font-size: .71rem; color: var(--dim); margin-top: 6px; }
+  .check-btn {
+    font-family: var(--mono); font-size: .75rem;
+    background: var(--cyan-d); border: 1px solid rgba(34,211,238,.25);
+    border-radius: 7px; padding: 8px 16px; color: var(--cyan);
+    cursor: pointer; transition: background .13s; white-space: nowrap;
+  }
+  .check-btn:hover:not([disabled]) { background: rgba(34,211,238,.18); }
+  .check-btn:disabled { opacity: .4; cursor: default; }
+
+  /* Design */
+  .design-ta {
+    font-family: var(--mono); font-size: .83rem;
+    background: var(--s2); border: 1px solid var(--border2);
+    border-radius: 8px; padding: 12px 13px; color: var(--text);
+    outline: none; width: 100%; min-height: 82px; resize: vertical;
+    line-height: 1.6; transition: border-color .13s;
+  }
+  .design-ta::placeholder { color: var(--dim); font-style: italic; }
+  .design-ta:focus { border-color: var(--green); }
+  .reveal-btn {
+    margin-top: 9px; background: var(--s2); border: 1px solid var(--border2);
+    border-radius: 7px; padding: 7px 15px; font-size: .78rem; color: var(--muted);
+    cursor: pointer; font-family: var(--sans);
+    transition: border-color .13s, color .13s; display: inline-block;
+  }
+  .reveal-btn:hover { border-color: var(--green); color: var(--green); }
+
+  /* Explanation */
+  .exp {
+    margin-top: 1rem; padding: 13px 15px;
+    background: var(--s2); border-radius: 8px;
+    border-left: 3px solid var(--cyan); display: none;
+  }
+  .exp.on { display: block; animation: fade .22s ease; }
+  @keyframes fade { from { opacity:0; transform:translateY(3px); } to { opacity:1; } }
+  .exp-lbl {
+    font-family: var(--mono); font-size: .67rem; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--cyan); margin-bottom: 6px;
+  }
+  .exp-body { font-size: .845rem; color: #8888a4; line-height: 1.78; }
+  .exp-body strong { color: var(--text); font-weight: 500; }
+  .exp-body code {
+    font-family: var(--mono); font-size: .8em;
+    background: var(--s3); padding: 1px 5px; border-radius: 3px; color: var(--cyan);
+  }
+  .ans-pill {
+    display: inline-block; font-family: var(--mono); font-size: .78rem;
+    background: var(--green-d); border: 1px solid rgba(61,220,132,.2);
+    color: var(--green); padding: 4px 10px; border-radius: 5px; margin-bottom: 8px;
+  }
+
+  /* Nav */
+  .nav-bar {
+    position: sticky; bottom: 1.25rem;
+    display: flex; justify-content: center; margin-top: 2rem; z-index: 20;
+  }
+  .nav-inner {
+    background: rgba(19,19,24,.94); backdrop-filter: blur(14px);
+    border: 1px solid var(--border2); border-radius: 50px;
+    padding: 7px 10px; display: flex; align-items: center; gap: 7px;
+    box-shadow: 0 8px 30px rgba(0,0,0,.5);
+  }
+  .nav-btn {
+    background: var(--s2); border: 1px solid var(--border);
+    border-radius: 24px; padding: 7px 20px; font-size: .82rem;
+    color: var(--text); cursor: pointer; font-family: var(--sans); font-weight: 500;
+    transition: border-color .13s, background .13s;
+  }
+  .nav-btn:hover:not([disabled]) { border-color: var(--border2); background: var(--s3); }
+  .nav-btn:disabled { opacity: .3; cursor: default; }
+  .nav-btn.pri { background: var(--green); border-color: var(--green); color: #0c0c0e; font-weight: 600; }
+  .nav-btn.pri:hover:not([disabled]) { background: #50e89a; border-color: #50e89a; }
+  .sec-pip { font-family: var(--mono); font-size: .7rem; color: var(--muted); padding: 0 6px; white-space: nowrap; }
+
+  /* Splash */
+  .splash {
+    min-height: calc(100vh - 10rem);
+    display: flex; flex-direction: column; justify-content: center;
+    animation: fade .5s ease;
+  }
+  .splash-eye {
+    font-family: var(--mono); font-size: .7rem; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 1.1rem;
+  }
+  .splash-h {
+    font-family: var(--mono); font-size: clamp(2rem,5vw,3rem);
+    font-weight: 600; line-height: 1.12; letter-spacing: -.03em; margin-bottom: 1rem;
+  }
+  .splash-h em { color: var(--green); font-style: normal; }
+  .splash-p { font-size: .95rem; color: var(--muted); max-width: 480px; line-height: 1.7; margin-bottom: 2rem; }
+  .splash-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 2.5rem; }
+  .chip {
+    display: flex; align-items: center; gap: 7px;
+    font-size: .8rem; color: var(--muted);
+    background: var(--s1); border: 1px solid var(--border);
+    border-radius: 8px; padding: 7px 13px;
+  }
+  .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .start-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--green); border: none; border-radius: 9px;
+    padding: 13px 30px; font-size: .95rem; color: #0c0c0e;
+    cursor: pointer; font-family: var(--mono); font-weight: 600;
+    transition: background .15s, transform .1s; letter-spacing: .01em;
+  }
+  .start-btn:hover { background: #50e89a; transform: translateY(-2px); }
+
+  /* Results */
+  .results { animation: fade .4s ease; }
+  .res-hero { text-align: center; padding: 2.5rem 1rem 2rem; }
+  .ring-wrap { position: relative; width: 116px; height: 116px; margin: 0 auto 1.5rem; }
+  .ring-svg { transform: rotate(-90deg); }
+  .ring-bg { fill:none; stroke: var(--s2); stroke-width: 8; }
+  .ring-fg { fill:none; stroke-width: 8; stroke-linecap: round; }
+  .ring-pct {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 1.4rem; font-weight: 600;
+  }
+  .res-title { font-family: var(--mono); font-size: 1.35rem; font-weight: 600; margin-bottom: .35rem; }
+  .res-sub   { font-size: .88rem; color: var(--muted); margin-bottom: 2rem; }
+  .res-grid  { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 9px; margin-bottom: 2rem; }
+  .res-cell  { background: var(--s1); border: 1px solid var(--border); border-radius: var(--r-lg); padding: .9rem; text-align: center; }
+  .res-cell-n   { font-family: var(--mono); font-size: 1.45rem; font-weight: 600; margin-bottom: 4px; }
+  .res-cell-lbl { font-size: .68rem; color: var(--muted); font-family: var(--mono); letter-spacing: .05em; }
+  .restart-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--green); border: none; border-radius: 9px;
+    padding: 12px 30px; font-size: .9rem; color: #0c0c0e;
+    cursor: pointer; font-family: var(--mono); font-weight: 600; transition: background .15s;
+  }
+  .restart-btn:hover { background: #50e89a; }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--s3); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div id="loading"><div class="spinner"></div>Loading questions…</div>
+<div class="app" id="app" style="display:none"></div>
+
+<script>
+/* ─── State ─────────────────────────────────────────────────── */
+let DATA = null;
+let Qs   = [];
+let SECS = [];
+let state = { screen: 'splash', section: 0, answers: {} };
+const KEYS = ['A','B','C','D'];
+
+/* ─── Boot: fetch quiz.json ─────────────────────────────────── */
+async function boot() {
+  try {
+    const r = await fetch('quiz.json');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    DATA = await r.json();
+    Qs   = DATA.questions;
+    SECS = DATA.meta.sections;
+  } catch(e) {
+    document.getElementById('loading').innerHTML =
+      '<span style="color:#f87171">Could not load quiz.json — make sure it is in the same folder as this HTML file. (' + e.message + ')</span>';
+    return;
+  }
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('app').style.display = '';
+  render();
+}
+
+/* ─── Helpers ───────────────────────────────────────────────── */
+function norm(s) {
+  return String(s).trim().toLowerCase().replace(/\s+/g,' ').replace(/[^a-z0-9 ]/g,'');
+}
+function checkFitb(q, val) {
+  return [q.answer, ...(q.alt||[])].some(a => norm(val) === norm(a));
+}
+function tagClass(t) {
+  if (/constraint|data/i.test(t))  return 't-con';
+  if (/relational|design/i.test(t)) return 't-des';
+  if (/crud/i.test(t))              return 't-cru';
+  if (/join/i.test(t))              return 't-joi';
+  return 't-typ';
+}
+function calcScore() {
+  let c=0, t=0;
+  Qs.forEach((q,i) => {
+    const a = state.answers[i]; if (!a) return; t++;
+    if (q.type==='mcq'    && a.v===q.answer)        c++;
+    else if (q.type==='fitb'   && a.checked && a.ok) c++;
+    else if (q.type==='design' && a.revealed)        c++;
+  });
+  return {c,t};
+}
+
+/* ─── Render dispatcher ─────────────────────────────────────── */
+function render() {
+  const app = document.getElementById('app');
+  if (state.screen==='splash')  { app.innerHTML = renderSplash();  return; }
+  if (state.screen==='results') { app.innerHTML = renderResults(); return; }
+  app.innerHTML = renderQuiz();
+}
+
+/* ─── Splash ────────────────────────────────────────────────── */
+function renderSplash() {
+  const m = DATA.meta;
+  const COL = {constraints:'#a78bfa', design:'#3ddc84', crud:'#f59e0b', joins:'#22d3ee'};
+  const chips = SECS.map(s => {
+    const lbl = s.label.split('—')[1]?.trim() || s.label;
+    return `<div class="chip"><span class="dot" style="background:${COL[s.id]||'#80809a'}"></span>${lbl}</div>`;
+  }).join('');
+  return `
+  <div class="header">
+    <div class="logo"><div class="logo-box">S</div>${m.title}</div>
+  </div>
+  <div class="splash">
+    <div class="splash-eye">Entry-Level Interview Prep</div>
+    <h1 class="splash-h">Master <em>SQL</em><br>fundamentals.</h1>
+    <p class="splash-p">${m.subtitle} — covering constraints, relational design, CRUD operations, and JOINs with detailed explanations for every answer.</p>
+    <div class="splash-chips">${chips}</div>
+    <button class="start-btn" onclick="startQuiz()">Start quiz →</button>
+  </div>`;
+}
+
+/* ─── Quiz ──────────────────────────────────────────────────── */
+function renderQuiz() {
+  const sec = SECS[state.section];
+  const done = Object.keys(state.answers).length;
+  const pct  = Math.round(done / Qs.length * 100);
+  const {c,t} = calcScore();
+
+  let html = `
+  <div class="header">
+    <div class="logo"><div class="logo-box">S</div>SQL Quiz</div>
+    <div class="hdr-pills">
+      <div class="hdr-pill">Score <span>${c}/${t}</span></div>
+      <div class="hdr-pill">${done}/${Qs.length} answered</div>
+    </div>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-meta"><span>Progress</span><span>${pct}%</span></div>
+    <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
+  </div>
+  <div class="sec-label">${sec.label}</div>`;
+
+  sec.qs.forEach(qi => {
+    const q = Qs[qi];
+    const a = state.answers[qi] || {};
+    const answered = q.type==='mcq' ? a.v!==undefined : q.type==='fitb' ? a.checked : a.revealed;
+    const isOk = answered && (q.type==='design' || (q.type==='mcq' && a.v===q.answer) || (q.type==='fitb' && a.ok));
+    const cardCls = answered ? ('card ' + (q.type==='design' ? 'ok' : isOk ? 'ok' : 'bad')) : 'card';
+    const bdgCls  = !answered ? '' : q.type==='design' ? 'des' : isOk ? 'ok' : 'bad';
+    const bdgTxt  = !answered ? '' : q.type==='design' ? '→'  : isOk ? '✓' : '✗';
+    const tagHtml = q.tags.map(tg=>`<span class="tag ${tagClass(tg)}">${tg}</span>`).join('');
+
+    html += `<div class="${cardCls}">
+      <div class="res-badge ${bdgCls}">${bdgTxt}</div>
+      <div class="card-hdr">
+        <span class="q-num">Q${q.n}</span>
+        <div class="tags">${tagHtml}</div>
+      </div>
+      <div class="q-text">${q.text}</div>`;
+
+    /* MCQ */
+    if (q.type==='mcq') {
+      html += `<div class="opts">${q.opts.map((o,i)=>{
+        let cls='opt';
+        if(a.v!==undefined){ if(i===q.answer) cls+=' is-correct'; else if(i===a.v) cls+=' is-wrong'; }
+        return `<button class="${cls}" ${a.v!==undefined?'disabled':''} onclick="pickMCQ(${qi},${i})"><span class="opt-k">${KEYS[i]}</span>${o}</button>`;
+      }).join('')}</div>`;
+    }
+    /* FITB */
+    else if (q.type==='fitb') {
+      const inpCls = a.checked ? (a.ok?'fitb-in ok':'fitb-in bad') : 'fitb-in';
+      const safeVal = (a.val||'').replace(/"/g,'&quot;');
+      html += `<div class="fitb-row">
+        <input class="${inpCls}" id="fi${qi}" type="text" placeholder="Your answer…"
+          value="${safeVal}" ${a.checked?'disabled':''}
+          onkeydown="if(event.key==='Enter')submitFitb(${qi})">
+        <button class="check-btn" ${a.checked?'disabled':''} onclick="submitFitb(${qi})">Check →</button>
+      </div>
+      ${!a.checked ? `<div class="fitb-hint">Hint: ${q.hint}</div>` : ''}
+      ${a.checked && !a.ok ? `<div class="ans-pill">Answer: ${q.answer}</div>` : ''}`;
+    }
+    /* Design */
+    else {
+      html += `<textarea class="design-ta" id="dt${qi}" placeholder="Write your approach or answer here…"
+        onchange="saveDraft(${qi},this.value)">${a.draft||''}</textarea>
+        ${!a.revealed
+          ? `<button class="reveal-btn" onclick="doReveal(${qi})">Reveal model answer ↓</button>`
+          : `<div class="ans-pill" style="margin-top:9px">Model answer: ${q.answer}</div>`}`;
+    }
+
+    html += `<div class="exp ${answered?'on':''}">
+      <div class="exp-lbl">Explanation</div>
+      <div class="exp-body">${q.exp}</div>
+    </div></div>`;
+  });
+
+  /* Navigation */
+  const secDone = sec.qs.every(qi => {
+    const a=state.answers[qi]||{}, q=Qs[qi];
+    return q.type==='mcq'?a.v!==undefined : q.type==='fitb'?a.checked : a.revealed;
+  });
+  const isFirst = state.section===0;
+  const isLast  = state.section===SECS.length-1;
+
+  html += `<div class="nav-bar"><div class="nav-inner">
+    <button class="nav-btn" ${isFirst?'disabled':''} onclick="prevSec()">← Back</button>
+    <span class="sec-pip">${state.section+1} / ${SECS.length}</span>
+    ${isLast
+      ? `<button class="nav-btn pri" onclick="showResults()">View results →</button>`
+      : `<button class="nav-btn pri" ${secDone?'':'disabled'} onclick="nextSec()">Next section →</button>`}
+  </div></div>`;
+
+  return html;
+}
+
+/* ─── Results ───────────────────────────────────────────────── */
+function renderResults() {
+  const {c,t} = calcScore();
+  const pct = t>0 ? Math.round(c/t*100) : 0;
+  const r=50, circ=2*Math.PI*r, dash=(circ*pct/100).toFixed(1), gap=(circ-circ*pct/100).toFixed(1);
+  const grade = pct>=80?'Strong performance':pct>=60?'Solid foundation':'Keep practising';
+  const gc    = pct>=80?'var(--green)':pct>=60?'var(--amber)':'var(--red)';
+
+  const cells = SECS.map(s => {
+    let sc=0;
+    s.qs.forEach(qi=>{
+      const a=state.answers[qi]||{}, q=Qs[qi];
+      if(q.type==='mcq'&&a.v===q.answer) sc++;
+      else if(q.type==='fitb'&&a.checked&&a.ok) sc++;
+      else if(q.type==='design'&&a.revealed) sc++;
+    });
+    const tot=s.qs.length;
+    const col=sc/tot>=.7?'var(--green)':sc/tot>=.5?'var(--amber)':'var(--red)';
+    const lbl=(s.label.split('—')[1]?.trim()||s.label);
+    return `<div class="res-cell">
+      <div class="res-cell-n" style="color:${col}">${sc}/${tot}</div>
+      <div class="res-cell-lbl">${lbl}</div>
+    </div>`;
+  }).join('');
+
+  return `<div class="results">
+  <div class="header">
+    <div class="logo"><div class="logo-box">S</div>SQL Quiz</div>
+  </div>
+  <div class="res-hero">
+    <div class="ring-wrap">
+      <svg class="ring-svg" width="116" height="116" viewBox="0 0 116 116">
+        <circle class="ring-bg" cx="58" cy="58" r="${r}"/>
+        <circle class="ring-fg" cx="58" cy="58" r="${r}"
+          stroke="${gc}" stroke-dasharray="${dash} ${gap}"/>
+      </svg>
+      <div class="ring-pct" style="color:${gc}">${pct}%</div>
+    </div>
+    <div class="res-title" style="color:${gc}">${grade}</div>
+    <div class="res-sub">${c} of ${t} questions answered correctly</div>
+  </div>
+  <div class="res-grid">${cells}</div>
+  <div style="text-align:center">
+    <button class="restart-btn" onclick="doRestart()">↺ Restart quiz</button>
+  </div>
+  </div>`;
+}
+
+/* ─── Handlers ──────────────────────────────────────────────── */
+function startQuiz()  { state={screen:'quiz',section:0,answers:{}}; render(); scrollTo(0,0); }
+function nextSec()    { state.section++; render(); scrollTo(0,0); }
+function prevSec()    { state.section--; render(); scrollTo(0,0); }
+function showResults(){ state.screen='results'; render(); scrollTo(0,0); }
+function doRestart()  { state={screen:'quiz',section:0,answers:{}}; render(); scrollTo(0,0); }
+
+function pickMCQ(qi,v) {
+  if (state.answers[qi]) return;
+  state.answers[qi]={v, ok:v===Qs[qi].answer};
+  render();
+}
+function submitFitb(qi) {
+  const inp=document.getElementById('fi'+qi);
+  if (!inp||state.answers[qi]?.checked) return;
+  const val=inp.value;
+  state.answers[qi]={val, checked:true, ok:checkFitb(Qs[qi],val)};
+  render();
+}
+function saveDraft(qi,val) {
+  if (!state.answers[qi]) state.answers[qi]={};
+  state.answers[qi].draft=val;
+}
+function doReveal(qi) {
+  const ta=document.getElementById('dt'+qi);
+  state.answers[qi]={draft:ta?ta.value:(state.answers[qi]?.draft||''), revealed:true};
+  render();
+}
+
+boot();
+</script>
+</body>
+</html>

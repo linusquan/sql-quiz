@@ -1,0 +1,531 @@
+{
+  "meta": {
+    "title": "SQL Fundamentals",
+    "subtitle": "Entry-Level Interview Prep · 40 Questions",
+    "sections": [
+      { "id": "constraints", "label": "Section 1 — Constraints & Data Types",   "qs": [0,1,2,3,4,5,6,7,8,9] },
+      { "id": "design",      "label": "Section 2 — Relational Design",           "qs": [10,11,12,13,14,15,16,17,18,19] },
+      { "id": "crud",        "label": "Section 3 — CRUD Operations",             "qs": [20,21,22,23,24,25,26,27,28,29] },
+      { "id": "joins",       "label": "Section 4 — Joins & Logic",               "qs": [30,31,32,33,34,35,36,37,38,39] }
+    ]
+  },
+  "questions": [
+
+    {
+      "n": 1,
+      "section": "constraints",
+      "type": "mcq",
+      "tags": ["Constraints", "MCQ"],
+      "text": "Which constraint ensures that all values in a column are different?",
+      "opts": ["NOT NULL", "UNIQUE", "CHECK", "FOREIGN KEY"],
+      "answer": 1,
+      "exp": "<strong>UNIQUE</strong> prevents any two rows from having the same value in that column. Unlike PRIMARY KEY, a table can have <em>multiple</em> UNIQUE constraints, and a UNIQUE column is allowed to store a single NULL (NULL is 'unknown' — not considered equal to anything, including itself).<br><br>The others: <code>NOT NULL</code> prevents empty values; <code>CHECK</code> validates against a custom condition; <code>FOREIGN KEY</code> enforces a link to another table. None of these prevent duplicates."
+    },
+
+    {
+      "n": 2,
+      "section": "constraints",
+      "type": "fitb",
+      "tags": ["Constraints", "Fill in the Blank"],
+      "text": "A __________ constraint is used to uniquely identify each record in a table and cannot contain NULL values.",
+      "answer": "PRIMARY KEY",
+      "alt": ["primary key"],
+      "hint": "Two words — the main identifier for every row",
+      "exp": "A <strong>PRIMARY KEY</strong> bundles two rules automatically: <code>UNIQUE</code> (no duplicate values) and <code>NOT NULL</code> (always needs a value). A table can only have <em>one</em> primary key, though it may span multiple columns (composite PK). It is the anchor that foreign keys in other tables point to.<br><br>Typical definitions:<br><code>id INT AUTO_INCREMENT PRIMARY KEY</code> (MySQL)<br><code>id SERIAL PRIMARY KEY</code> (PostgreSQL)<br><code>id INT IDENTITY PRIMARY KEY</code> (SQL Server)"
+    },
+
+    {
+      "n": 3,
+      "section": "constraints",
+      "type": "mcq",
+      "tags": ["Constraints", "MCQ"],
+      "text": "What is the purpose of a Foreign Key?",
+      "opts": [
+        "To speed up data entry.",
+        "To ensure a column has a default value.",
+        "To create a link between two tables and ensure referential integrity.",
+        "To prevent a table from having more than 1000 rows."
+      ],
+      "answer": 2,
+      "exp": "<strong>Referential integrity</strong> means every value in the foreign key column must exist as a primary key in the referenced table — or be NULL if allowed. For example, <code>books.category_id</code> as a FK to <code>categories.id</code> prevents you assigning a category that doesn't exist.<br><br>Without FKs, you'd accumulate 'orphaned' rows (e.g. a loan referencing a deleted member). The FK constraint makes the database enforce the relationship automatically — no application-level checks needed."
+    },
+
+    {
+      "n": 4,
+      "section": "constraints",
+      "type": "fitb",
+      "tags": ["Constraints", "Fill in the Blank"],
+      "text": "If you want to ensure that a Price column never contains a negative number, you would use a __________ constraint.",
+      "answer": "CHECK",
+      "alt": ["check"],
+      "hint": "Validates a boolean expression on every write",
+      "exp": "<strong>CHECK</strong> lets you define a rule that every row must satisfy on INSERT or UPDATE. Example:<br><code>price DECIMAL(10,2) CHECK (price >= 0)</code><br><br>You can combine conditions:<br><code>CHECK (price >= 0 AND price < 100000)</code><br><br>Common uses: positive quantities, valid date ranges, restricted status values, age limits. If a write would violate the condition the database rejects it with an error — enforcing data integrity without any application code."
+    },
+
+    {
+      "n": 5,
+      "section": "constraints",
+      "type": "mcq",
+      "tags": ["Constraints", "MCQ"],
+      "text": "Which of these is NOT a standard entry-level SQL constraint?",
+      "opts": ["PRIMARY KEY", "AUTO_INCREMENT", "EXCLUDE", "DEFAULT"],
+      "answer": 2,
+      "exp": "<strong>EXCLUDE</strong> is a PostgreSQL-specific advanced constraint (used for range exclusions) — it is not part of the SQL standard and is not taught at entry level.<br><br><code>AUTO_INCREMENT</code> / <code>IDENTITY</code> / <code>SERIAL</code> is a column property (auto-generates sequential numbers), not technically a constraint, but ubiquitous in practice.<br><br>The five standard constraints are: <code>PRIMARY KEY</code>, <code>FOREIGN KEY</code>, <code>UNIQUE</code>, <code>NOT NULL</code>, and <code>CHECK</code>. <code>DEFAULT</code> is also widely accepted as a sixth."
+    },
+
+    {
+      "n": 6,
+      "section": "constraints",
+      "type": "design",
+      "tags": ["Constraints", "Design"],
+      "text": "You are creating a Members table. You want every member to provide an email address and no two members to share the same email. Which two constraints do you apply to the email column, and why?",
+      "answer": "NOT NULL (email must always be provided) + UNIQUE (no two members may share the same email)",
+      "exp": "<strong>NOT NULL</strong> ensures the column must always have a value — a member row cannot be created without one. <strong>UNIQUE</strong> ensures no two rows share the same email.<br><br>Combined SQL: <code>email VARCHAR(255) NOT NULL UNIQUE</code><br><br>Note: you <em>could</em> make email the PRIMARY KEY (which implicitly enforces both), but a surrogate integer ID is generally preferred as PK for performance and stability — email addresses can change, and a changing PK breaks all FK references to it."
+    },
+
+    {
+      "n": 7,
+      "section": "constraints",
+      "type": "fitb",
+      "tags": ["Constraints", "Data Types", "Fill in the Blank"],
+      "text": "A __________ data type is used for variable-length strings such as a person's name.",
+      "answer": "VARCHAR",
+      "alt": ["varchar"],
+      "hint": "Short for 'variable character'",
+      "exp": "<strong>VARCHAR(n)</strong> stores strings up to <em>n</em> characters, consuming only as much space as the actual content. Ideal for names, emails, titles, and any field with variable length.<br><br>Contrast with <code>CHAR(n)</code> — always uses exactly <em>n</em> bytes, padding with spaces. Better for truly fixed-length values like country codes ('AU', 'US') or fixed-format codes.<br><br>For long free-form content (articles, notes, bios) use <code>TEXT</code>, which has no declared length limit. Always specify a sensible max for VARCHAR: <code>name VARCHAR(100)</code>."
+    },
+
+    {
+      "n": 8,
+      "section": "constraints",
+      "type": "mcq",
+      "tags": ["Constraints", "MCQ"],
+      "text": "What does the DEFAULT constraint do?",
+      "opts": [
+        "Forces the column to be unique.",
+        "Automatically supplies a value when none is provided on INSERT.",
+        "Prevents NULL values from being stored.",
+        "Links the column to another table."
+      ],
+      "answer": 1,
+      "exp": "<strong>DEFAULT</strong> sets a fallback value used when an INSERT statement omits that column. Example:<br><code>status VARCHAR(20) DEFAULT 'active'</code><br><code>created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP</code><br><br>The default is only applied when the column is absent from the INSERT — if you explicitly write <code>NULL</code>, that NULL is stored (unless NOT NULL is also present). DEFAULT reduces boilerplate and keeps data consistent without requiring the application to always supply common values."
+    },
+
+    {
+      "n": 9,
+      "section": "constraints",
+      "type": "mcq",
+      "tags": ["Constraints", "MCQ"],
+      "text": "A table's PRIMARY KEY is made up of two columns combined (e.g. book_id + member_id). What is this called?",
+      "opts": [
+        "A duplicate key",
+        "A foreign key pair",
+        "A composite primary key",
+        "A compound constraint"
+      ],
+      "answer": 2,
+      "exp": "A <strong>composite primary key</strong> uses two or more columns together to uniquely identify a row. No single column needs to be unique — only the <em>combination</em> must be unique.<br><br>Example in a junction table:<br><code>PRIMARY KEY (book_id, member_id)</code><br><br>This allows member 1 to borrow book 5, and member 2 to also borrow book 5 — but member 1 cannot borrow book 5 twice (same pair).<br><br>Composite PKs are the natural choice for junction tables. They can also serve as implicit UNIQUE + NOT NULL constraints on the combination."
+    },
+
+    {
+      "n": 10,
+      "section": "constraints",
+      "type": "mcq",
+      "tags": ["Constraints", "MCQ"],
+      "text": "Which of the following best describes referential integrity?",
+      "opts": [
+        "All column values must be spelled correctly.",
+        "A foreign key value must match an existing primary key in the referenced table, or be NULL.",
+        "Every table must have at least one row.",
+        "Column names must match across related tables."
+      ],
+      "answer": 1,
+      "exp": "<strong>Referential integrity</strong> is the guarantee that relationships between tables remain consistent. A foreign key value must either match an existing primary key in the parent table, or be NULL (if the FK column allows NULL).<br><br>Example: if <code>loans.book_id = 99</code>, a book with ID 99 must exist in the Books table. If you try to delete book 99 while loans reference it, the database will reject it (or cascade, depending on your ON DELETE rule: <code>CASCADE</code>, <code>SET NULL</code>, or <code>RESTRICT</code>)."
+    },
+
+    {
+      "n": 11,
+      "section": "design",
+      "type": "design",
+      "tags": ["Relational Design", "Design"],
+      "text": "In a library database, you have a Books table and a Categories table (e.g. Fiction, History). One book belongs to one category; one category can have many books. How do you link the tables?",
+      "answer": "Add category_id as a Foreign Key in the Books table (FK on the 'many' side)",
+      "exp": "This is a <strong>one-to-many (1:M)</strong> relationship — one category, many books. The foreign key always lives on the <em>many</em> side.<br><br>So <code>books.category_id</code> references <code>categories.id</code>. This avoids storing the category name redundantly in every book row. If a category is renamed, you only update one row in Categories and all books reflect it automatically via the FK.<br><br>Schema:<br><code>categories(id PK, name)</code><br><code>books(id PK, title, category_id FK → categories.id)</code>"
+    },
+
+    {
+      "n": 12,
+      "section": "design",
+      "type": "mcq",
+      "tags": ["Relational Design", "MCQ"],
+      "text": "You need to handle a Many-to-Many relationship between Authors and Books (a book can have multiple authors, an author can write multiple books). What is the correct design?",
+      "opts": [
+        "Add author_id to the Books table.",
+        "Add book_id to the Authors table.",
+        "Create a junction table (e.g. Book_Authors) containing both IDs as foreign keys.",
+        "Store a comma-separated list of author names in the Books table."
+      ],
+      "answer": 2,
+      "exp": "A <strong>junction table</strong> resolves M:M relationships. <code>Book_Authors(book_id FK, author_id FK)</code> holds one row per pairing — each combination is unique.<br><br>Options A and B each create a 1:M, losing the many-to-many capability. Option D (comma-separated strings) violates First Normal Form: you can't efficiently query, index, or enforce integrity on values buried inside a string.<br><br>The junction table can also carry relationship-specific data, e.g. <code>role VARCHAR</code> (lead author vs contributor) or <code>contribution_order INT</code>."
+    },
+
+    {
+      "n": 13,
+      "section": "design",
+      "type": "fitb",
+      "tags": ["Relational Design", "Fill in the Blank"],
+      "text": "A relationship where one User has exactly one Profile (and vice versa) is called a __________ relationship.",
+      "answer": "One-to-One",
+      "alt": ["one to one", "1 to 1", "1:1"],
+      "hint": "The simplest of the three relationship types",
+      "exp": "A <strong>One-to-One (1:1)</strong> relationship means each row in Table A corresponds to at most one row in Table B. Implement it by placing a FK on one side and adding a <code>UNIQUE</code> constraint:<br><br><code>profiles.user_id INT UNIQUE REFERENCES users(id)</code><br><br>The UNIQUE prevents two profile rows claiming the same user. 1:1 is useful for splitting a wide table — e.g. separating sensitive user data (payment info, government IDs) into a secure profiles table, or storing large optional fields (bio, avatar_url) separately for performance."
+    },
+
+    {
+      "n": 14,
+      "section": "design",
+      "type": "design",
+      "tags": ["Relational Design", "Design"],
+      "text": "You have a Members table and a Loans table. When a member borrows a book, a record is added to Loans. Which table holds the Foreign Key linking them, and why?",
+      "answer": "The Loans table holds member_id as a FK — the FK always lives on the 'many' side",
+      "exp": "This is a <strong>one-to-many</strong> relationship: one member, many loans. The FK always goes on the <em>many</em> side.<br><br><code>loans.member_id</code> → <code>members.id</code><br><br>Putting loan references inside Members would require storing multiple IDs per member row — impossible cleanly in a relational model without arrays, which breaks relational principles and makes querying a nightmare.<br><br>The Loans table naturally holds multiple FKs: <code>member_id</code> (who) and <code>book_id</code> (what), plus transaction data like <code>borrow_date</code> and <code>return_date</code>."
+    },
+
+    {
+      "n": 15,
+      "section": "design",
+      "type": "mcq",
+      "tags": ["Relational Design", "MCQ"],
+      "text": "What is normalisation?",
+      "opts": [
+        "The process of deleting old data to save space.",
+        "The process of organising data to reduce redundancy and improve integrity.",
+        "The process of converting all text to uppercase.",
+        "The process of backing up a database."
+      ],
+      "answer": 1,
+      "exp": "<strong>Normalisation</strong> systematically structures tables to minimise duplication and prevent update anomalies. The main normal forms:<br><br><strong>1NF</strong> — atomic values, no repeating groups or arrays in a cell<br><strong>2NF</strong> — no partial dependency on a composite key<br><strong>3NF</strong> — no transitive dependency (non-key columns depend only on the PK)<br><br>A normalised design means you update data in one place, and it's consistent everywhere. The trade-off: normalised schemas require more JOINs to query — sometimes denormalisation is deliberately applied for read performance."
+    },
+
+    {
+      "n": 16,
+      "section": "design",
+      "type": "fitb",
+      "tags": ["Relational Design", "Fill in the Blank"],
+      "text": "To represent a Many-to-Many relationship, we use a linking table also known as a __________ table.",
+      "answer": "junction",
+      "alt": ["bridge", "associative", "pivot", "linking", "join"],
+      "hint": "Also called a bridge or associative table",
+      "exp": "A <strong>junction table</strong> (also: bridge, associative, pivot, or linking table) sits between two entities and resolves M:M. It holds at minimum the PKs of both tables as foreign keys.<br><br>Example: <code>Book_Authors(book_id FK, author_id FK)</code> where <code>PRIMARY KEY (book_id, author_id)</code>.<br><br>It can carry relationship-specific attributes too — like <code>borrow_date</code> and <code>return_date</code> in a Loans table connecting Members and Books. This makes the junction table a first-class entity in its own right, not just a 'connector'."
+    },
+
+    {
+      "n": 17,
+      "section": "design",
+      "type": "design",
+      "tags": ["Relational Design", "Design"],
+      "text": "You want to track the date a book was returned. Should this column go in the Books table or the Loans table? Explain why.",
+      "answer": "Loans table — return_date describes a specific borrow transaction, not the book itself",
+      "exp": "The return date belongs to a <strong>specific loan transaction</strong>, not to the book itself. A book can be borrowed and returned many times by many different members.<br><br>Putting <code>return_date</code> in Books would only record the <em>last</em> return and would overwrite history with each new loan. In the Loans table, each row is one complete borrow-return cycle:<br><br><code>loans(id, member_id FK, book_id FK, borrow_date, return_date)</code><br><br>This preserves full history and supports queries like: 'how often was this book borrowed?', 'what was the average loan duration?', 'which loans are overdue?'"
+    },
+
+    {
+      "n": 18,
+      "section": "design",
+      "type": "mcq",
+      "tags": ["Relational Design", "MCQ"],
+      "text": "In a 1-to-Many relationship between Publishers and Books, where does the Foreign Key go?",
+      "opts": [
+        "In the Publishers table.",
+        "In the Books table.",
+        "In a separate junction table.",
+        "It doesn't matter which side."
+      ],
+      "answer": 1,
+      "exp": "The FK always lives on the <strong>'many' side</strong>. Each book has one publisher, so <code>books.publisher_id</code> references <code>publishers.id</code>.<br><br>Putting it on the Publishers side would require storing multiple book IDs per publisher row — an array, which breaks relational design. A junction table is only needed for M:M.<br><br>The rule to remember: <em>the child (many) carries the reference to the parent (one)</em>. One publisher → many books. Books carry publisher_id."
+    },
+
+    {
+      "n": 19,
+      "section": "design",
+      "type": "mcq",
+      "tags": ["Relational Design", "MCQ"],
+      "text": "In a well-designed library schema, a Loans table has both a member_id and a book_id column. What relationship type does the Loans table represent?",
+      "opts": [
+        "A one-to-one relationship between Members and Books.",
+        "A one-to-many relationship from Books to Members.",
+        "A many-to-many relationship between Members and Books, resolved via a junction table.",
+        "A self-referencing relationship within Members."
+      ],
+      "answer": 2,
+      "exp": "The Loans table is a <strong>junction table</strong> that resolves a many-to-many relationship: a member can borrow many books, and a book can be borrowed by many members (over time).<br><br><code>loans(id PK, member_id FK → members, book_id FK → books, borrow_date, return_date)</code><br><br>The fact that it carries extra attributes (borrow_date, return_date) elevates it from a 'pure' junction table to a full entity — the loan itself is a meaningful real-world concept, not just a connector."
+    },
+
+    {
+      "n": 20,
+      "section": "design",
+      "type": "mcq",
+      "tags": ["Relational Design", "MCQ"],
+      "text": "Which statement about Primary Keys and Foreign Keys is correct?",
+      "opts": [
+        "Both can contain NULL values.",
+        "A Foreign Key references a Primary Key in another (or the same) table.",
+        "A table can only have one Foreign Key.",
+        "Primary Keys must always be integers."
+      ],
+      "answer": 1,
+      "exp": "A <strong>Foreign Key</strong> references a <strong>Primary Key</strong> (or UNIQUE key) in another table — or even the same table (self-referencing FK). This is the foundational mechanism of relational databases.<br><br>The other options are all false:<br>• Primary Keys cannot be NULL; Foreign Keys can be NULL (representing an optional relationship)<br>• A table can have many Foreign Keys (e.g. Loans has member_id FK and book_id FK)<br>• PKs can be any data type — strings, UUIDs, composite columns — though integers are most common for performance"
+    },
+
+    {
+      "n": 21,
+      "section": "crud",
+      "type": "fitb",
+      "tags": ["CRUD", "Fill in the Blank"],
+      "text": "To add a new row of data into a table, you use INSERT INTO followed by the __________ keyword.",
+      "answer": "VALUES",
+      "alt": ["values"],
+      "hint": "Introduces the data to insert",
+      "exp": "Full syntax:<br><code>INSERT INTO table_name (col1, col2, col3) VALUES (val1, val2, val3);</code><br><br>Best practice: always list column names explicitly — it makes the query resilient to schema changes and clearly documents intent.<br><br>Multiple rows in one statement:<br><code>VALUES (v1a, v2a), (v1b, v2b), (v1c, v2c);</code><br><br>Alternatively, copy from another query:<br><code>INSERT INTO archive_loans SELECT * FROM loans WHERE return_date < '2020-01-01';</code>"
+    },
+
+    {
+      "n": 22,
+      "section": "crud",
+      "type": "mcq",
+      "tags": ["CRUD", "MCQ"],
+      "text": "What happens if you run DELETE FROM Books; without a WHERE clause?",
+      "opts": [
+        "It deletes the Books table itself.",
+        "It deletes all rows from the table but keeps the table structure.",
+        "It triggers an error and does nothing.",
+        "It only deletes the first row."
+      ],
+      "answer": 1,
+      "exp": "<code>DELETE FROM Books;</code> removes <strong>every row</strong> but keeps the table structure, columns, indexes, and constraints intact.<br><br>Compare:<br>• <code>DROP TABLE Books;</code> — removes the table entirely (structure + data), irreversible without backup<br>• <code>TRUNCATE TABLE Books;</code> — also removes all rows, but faster (no row-by-row logging) and resets auto-increment counters<br><br>Critical habit: <strong>always write your WHERE clause first</strong>, then the rest of the DELETE. Many DBAs test with a SELECT using the same WHERE before executing a DELETE in production."
+    },
+
+    {
+      "n": 23,
+      "section": "crud",
+      "type": "fitb",
+      "tags": ["CRUD", "Fill in the Blank"],
+      "text": "The __________ command is used to modify existing data within a table.",
+      "answer": "UPDATE",
+      "alt": ["update"],
+      "hint": "The U in CRUD",
+      "exp": "Syntax:<br><code>UPDATE table SET col1 = val1, col2 = val2 WHERE condition;</code><br><br>The WHERE clause is critical — omitting it updates <em>every row</em>. Always preview with a matching SELECT first.<br><br>You can reference the current value:<br><code>UPDATE Books SET view_count = view_count + 1 WHERE id = 5;</code><br><br>Update multiple columns:<br><code>UPDATE Members SET status = 'inactive', updated_at = NOW() WHERE last_login < '2023-01-01';</code><br><br>In a transaction, you can ROLLBACK an accidental UPDATE before COMMITting."
+    },
+
+    {
+      "n": 24,
+      "section": "crud",
+      "type": "mcq",
+      "tags": ["CRUD", "MCQ"],
+      "text": "Which SQL keyword is used to sort the result set?",
+      "opts": ["SORT BY", "ARRANGE BY", "ORDER BY", "GROUP BY"],
+      "answer": 2,
+      "exp": "<strong>ORDER BY</strong> sorts the results. Default direction is ascending (A→Z, 0→9). Use <code>DESC</code> for descending.<br><br>Example:<br><code>SELECT * FROM Books ORDER BY title ASC, publication_year DESC;</code><br><br>Sort by title alphabetically; for ties, sort by year newest-first.<br><br>Common confusion: <code>GROUP BY</code> groups rows for aggregation (COUNT, SUM, AVG) — it doesn't sort output. <code>SORT BY</code> and <code>ARRANGE BY</code> are not SQL keywords."
+    },
+
+    {
+      "n": 25,
+      "section": "crud",
+      "type": "fitb",
+      "tags": ["CRUD", "Fill in the Blank"],
+      "text": "To remove a table's structure entirely from the database, you use the __________ TABLE command.",
+      "answer": "DROP",
+      "alt": ["drop"],
+      "hint": "Permanently removes everything — structure and data",
+      "exp": "<code>DROP TABLE table_name;</code> permanently deletes the table definition, all rows, indexes, triggers, and associated constraints. It is <strong>irreversible</strong> without a backup.<br><br>Contrast the three 'delete' levels:<br>• <code>DELETE FROM t WHERE ...</code> — removes specific rows, table stays<br>• <code>TRUNCATE TABLE t;</code> — removes all rows, table stays, faster than DELETE<br>• <code>DROP TABLE t;</code> — removes the table entirely<br><br>In production, DROP is typically protected by restricted permissions or requires explicit confirmation in database tools."
+    },
+
+    {
+      "n": 26,
+      "section": "crud",
+      "type": "mcq",
+      "tags": ["CRUD", "MCQ"],
+      "text": "How do you select all columns from a table named Members?",
+      "opts": [
+        "SELECT all FROM Members;",
+        "SELECT Members.*;",
+        "SELECT * FROM Members;",
+        "GET * FROM Members;"
+      ],
+      "answer": 2,
+      "exp": "<code>SELECT * FROM Members;</code> — the <code>*</code> wildcard means 'all columns'. This is correct.<br><br>In practice, listing columns explicitly is preferred for production queries:<br><code>SELECT id, name, email FROM Members;</code><br><br>Reasons: only fetches needed data (faster), documents what the query depends on, and is resilient if new columns are added to the table.<br><br><code>Members.*</code> works in multi-table queries to mean 'all columns from the Members table', but not as a standalone query. <code>GET</code> is not a SQL command."
+    },
+
+    {
+      "n": 27,
+      "section": "crud",
+      "type": "design",
+      "tags": ["CRUD", "Design"],
+      "text": "Write a SQL statement to update the status of a book to 'Available' for the book with ID = 101.",
+      "answer": "UPDATE Books SET status = 'Available' WHERE id = 101;",
+      "exp": "<code>UPDATE Books SET status = 'Available' WHERE id = 101;</code><br><br>Key points:<br>• <code>SET</code> specifies the column and its new value<br>• <code>WHERE id = 101</code> limits the change to exactly one row — without it, every book would be updated<br>• String values use single quotes<br>• Multiple columns: <code>SET status = 'Available', updated_at = NOW()</code><br><br>Good practice: always verify with <code>SELECT * FROM Books WHERE id = 101;</code> before executing the UPDATE, especially in production environments."
+    },
+
+    {
+      "n": 28,
+      "section": "crud",
+      "type": "mcq",
+      "tags": ["CRUD", "MCQ"],
+      "text": "Which SQL clause is used to filter rows in a SELECT query based on a condition?",
+      "opts": ["HAVING", "WHERE", "FILTER", "LIMIT"],
+      "answer": 1,
+      "exp": "<strong>WHERE</strong> filters individual rows <em>before</em> any grouping or aggregation happens.<br><br><code>SELECT * FROM Books WHERE publication_year > 2010 AND available = 1;</code><br><br>Common confusion:<br>• <code>HAVING</code> — filters groups <em>after</em> GROUP BY + aggregation<br>• <code>LIMIT</code> — restricts the number of rows <em>returned</em> (doesn't filter by condition)<br>• <code>FILTER</code> — not standard SQL for row filtering (it's used in some databases as a modifier on window functions)<br><br>Rule: WHERE for rows, HAVING for groups."
+    },
+
+    {
+      "n": 29,
+      "section": "crud",
+      "type": "fitb",
+      "tags": ["CRUD", "Fill in the Blank"],
+      "text": "The SQL command to read or retrieve data from a table is __________ .",
+      "answer": "SELECT",
+      "alt": ["select"],
+      "hint": "The R in CRUD — the most frequently used SQL statement",
+      "exp": "<strong>SELECT</strong> is the R (Read) in CRUD and the most frequently written SQL statement.<br><br>Full basic syntax:<br><code>SELECT column1, column2 FROM table_name WHERE condition ORDER BY column1 LIMIT 10;</code><br><br>Execution order (conceptual): FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT.<br><br>Understanding this order explains why you can't use a SELECT alias in a WHERE clause (the alias doesn't exist yet at the WHERE stage), but you can use it in ORDER BY."
+    },
+
+    {
+      "n": 30,
+      "section": "crud",
+      "type": "mcq",
+      "tags": ["CRUD", "MCQ"],
+      "text": "What does DISTINCT do in a SELECT query?",
+      "opts": [
+        "Sorts the results alphabetically.",
+        "Removes duplicate rows from the result set.",
+        "Filters rows by a condition.",
+        "Groups rows for aggregation."
+      ],
+      "answer": 1,
+      "exp": "<strong>SELECT DISTINCT</strong> returns only unique rows, removing duplicates from the result.<br><br><code>SELECT DISTINCT genre FROM Books;</code> returns each genre once, no matter how many books share it.<br><br>It applies across <em>all</em> selected columns combined — so <code>SELECT DISTINCT author_id, genre</code> returns unique (author_id, genre) pairs, not unique author_ids alone.<br><br>DISTINCT has a performance cost (requires sorting or hashing to find duplicates). If you find yourself using it to 'fix' a query, it often signals a missing or incorrect JOIN condition rather than a real need for DISTINCT."
+    },
+
+    {
+      "n": 31,
+      "section": "joins",
+      "type": "mcq",
+      "tags": ["JOINs", "MCQ"],
+      "text": "Which JOIN returns only the rows that have matching values in both tables?",
+      "opts": ["LEFT JOIN", "FULL OUTER JOIN", "INNER JOIN", "RIGHT JOIN"],
+      "answer": 2,
+      "exp": "<strong>INNER JOIN</strong> returns only rows where the join condition is satisfied in <em>both</em> tables. Non-matching rows from either side are excluded entirely.<br><br><code>SELECT b.title, a.name FROM Books b INNER JOIN Authors a ON b.author_id = a.id;</code><br><br>Books with no author (NULL author_id) and authors with no books are both excluded. Think of it as the intersection of a Venn diagram. Use INNER JOIN when you only want complete, matched records from both sides."
+    },
+
+    {
+      "n": 32,
+      "section": "joins",
+      "type": "fitb",
+      "tags": ["JOINs", "Fill in the Blank"],
+      "text": "If you use a LEFT JOIN and there is no match in the right table, the columns from the right table will contain __________.",
+      "answer": "NULL",
+      "alt": ["null", "nulls"],
+      "hint": "The SQL representation of an absent or unknown value",
+      "exp": "With a <strong>LEFT JOIN</strong>, every row from the left table is returned. Where there's no matching row on the right, all right-side columns become <strong>NULL</strong>.<br><br>This enables the classic anti-join pattern — find left-side rows with no match:<br><code>SELECT m.name FROM Members m LEFT JOIN Loans l ON m.id = l.member_id WHERE l.id IS NULL;</code><br><br>Members who have never borrowed a book. The <code>WHERE l.id IS NULL</code> keeps only the unmatched rows. You must use <code>IS NULL</code>, not <code>= NULL</code> — NULL comparisons with = always return false in SQL."
+    },
+
+    {
+      "n": 33,
+      "section": "joins",
+      "type": "mcq",
+      "tags": ["JOINs", "MCQ"],
+      "text": "You want a list of ALL members, even those who have never borrowed a book. Which join should you use between Members (left) and Loans (right)?",
+      "opts": ["INNER JOIN", "LEFT JOIN", "CROSS JOIN", "NATURAL JOIN"],
+      "answer": 1,
+      "exp": "<strong>LEFT JOIN</strong> returns every row from the left table (Members) regardless of whether a match exists in Loans. Members with no loans get NULL in the loan columns.<br><br><code>SELECT m.name, COUNT(l.id) AS loan_count FROM Members m LEFT JOIN Loans l ON m.id = l.member_id GROUP BY m.id, m.name;</code><br><br>INNER JOIN would silently exclude members with no loans. CROSS JOIN returns every combination (5 members × 100 loans = 500 rows — almost never what you want). NATURAL JOIN auto-joins on same-named columns — risky and generally avoided in production."
+    },
+
+    {
+      "n": 34,
+      "section": "joins",
+      "type": "fitb",
+      "tags": ["JOINs", "Fill in the Blank"],
+      "text": "To combine the results of two SELECT statements into one result set removing duplicates, you use the __________ operator.",
+      "answer": "UNION",
+      "alt": ["union"],
+      "hint": "Stacks result sets vertically",
+      "exp": "<strong>UNION</strong> stacks two SELECT result sets vertically and removes duplicate rows. Both queries must return the same number of columns with compatible data types.<br><br><code>SELECT name FROM Members UNION SELECT name FROM Staff;</code><br><br>Variants:<br>• <code>UNION ALL</code> — keeps duplicates (faster, skips dedup step)<br>• <code>INTERSECT</code> — only rows present in both sets<br>• <code>EXCEPT</code> (or <code>MINUS</code> in Oracle) — rows in the first set not in the second<br><br>Contrast with JOIN, which combines columns horizontally. UNION combines rows vertically."
+    },
+
+    {
+      "n": 35,
+      "section": "joins",
+      "type": "mcq",
+      "tags": ["JOINs", "MCQ"],
+      "text": "What is a Self-Join?",
+      "opts": [
+        "Joining a table to a backup copy of itself.",
+        "A join that runs automatically when a FK is defined.",
+        "Joining a table to itself using aliases to compare rows within the same table.",
+        "A join that doesn't require a Foreign Key."
+      ],
+      "answer": 2,
+      "exp": "A <strong>Self-Join</strong> joins a table to itself using two aliases to treat it as two separate sources. The classic use case is hierarchical data — e.g. employees and their managers, stored in the same table.<br><br><code>SELECT e.name AS employee, m.name AS manager FROM Employees e LEFT JOIN Employees m ON e.manager_id = m.id;</code><br><br>Here Employees is used twice: once as 'e' (the employee) and once as 'm' (the manager). LEFT JOIN ensures employees with no manager (top of the hierarchy) still appear with NULL in the manager column."
+    },
+
+    {
+      "n": 36,
+      "section": "joins",
+      "type": "design",
+      "tags": ["JOINs", "Design"],
+      "text": "You have a Books table and an Authors table linked by author_id. Write the JOIN clause to connect them and retrieve each book title with its author's name.",
+      "answer": "SELECT b.title, a.name FROM Books b JOIN Authors a ON b.author_id = a.id;",
+      "exp": "Full query:<br><code>SELECT b.title, a.name FROM Books b JOIN Authors a ON b.author_id = a.id;</code><br><br>Key points:<br>• <code>JOIN</code> without qualifier = INNER JOIN (only books with a matching author)<br>• <code>ON b.author_id = a.id</code> — the condition linking FK to PK<br>• Aliases <code>b</code> and <code>a</code> prevent ambiguity when column names overlap<br><br>For M:M via junction table, chain the joins:<br><code>FROM Books b JOIN Book_Authors ba ON b.id = ba.book_id JOIN Authors a ON ba.author_id = a.id</code><br><br>If some books have no author (nullable FK), use LEFT JOIN to keep them."
+    },
+
+    {
+      "n": 37,
+      "section": "joins",
+      "type": "mcq",
+      "tags": ["JOINs", "MCQ"],
+      "text": "Which aggregate function finds the total number of books in the library?",
+      "opts": ["TOTAL()", "SUM()", "COUNT()", "MAX()"],
+      "answer": 2,
+      "exp": "<strong>COUNT()</strong> counts rows or non-NULL values.<br><br>• <code>COUNT(*)</code> — counts all rows including NULLs<br>• <code>COUNT(column)</code> — counts only non-NULL values in that column<br>• <code>COUNT(DISTINCT column)</code> — counts distinct non-NULL values<br><br>Other aggregates:<br>• <code>SUM(col)</code> — total of numeric values (e.g. total fines collected)<br>• <code>AVG(col)</code> — arithmetic mean<br>• <code>MAX(col)</code> / <code>MIN(col)</code> — highest or lowest value<br><br><code>TOTAL()</code> is not standard SQL. All aggregates are typically paired with GROUP BY."
+    },
+
+    {
+      "n": 38,
+      "section": "joins",
+      "type": "fitb",
+      "tags": ["JOINs", "Fill in the Blank"],
+      "text": "When using AVG(price) and you want the average price per category, you must use the __________ clause.",
+      "answer": "GROUP BY",
+      "alt": ["group by"],
+      "hint": "Splits rows into groups before aggregating",
+      "exp": "<strong>GROUP BY</strong> divides rows into groups, then applies aggregates to each group separately.<br><br><code>SELECT category, AVG(price) AS avg_price, COUNT(*) AS book_count FROM Books GROUP BY category;</code><br><br>Rules:<br>• Any column in SELECT that isn't inside an aggregate must appear in GROUP BY<br>• <code>WHERE</code> filters rows <em>before</em> grouping; <code>HAVING</code> filters groups <em>after</em><br><br><code>HAVING AVG(price) > 20</code> — only categories with average price above $20<br><br>Order of clauses: FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT"
+    },
+
+    {
+      "n": 39,
+      "section": "joins",
+      "type": "mcq",
+      "tags": ["JOINs", "MCQ"],
+      "text": "A CROSS JOIN between a table of 4 members and a table of 3 books produces how many rows?",
+      "opts": ["7 rows", "4 rows", "12 rows", "3 rows"],
+      "answer": 2,
+      "exp": "A <strong>CROSS JOIN</strong> returns the Cartesian product — every possible combination of rows from both tables. 4 members × 3 books = <strong>12 rows</strong>.<br><br>It has no ON or USING condition. Example:<br><code>SELECT m.name, b.title FROM Members m CROSS JOIN Books b;</code><br><br>Practical uses are narrow: generating all date/product combinations for a report, seeding test data, or building combination matrices. Accidentally using CROSS JOIN on large tables can produce millions of rows and crash a query — always check whether you intended INNER JOIN instead."
+    },
+
+    {
+      "n": 40,
+      "section": "joins",
+      "type": "mcq",
+      "tags": ["JOINs", "MCQ"],
+      "text": "What is the difference between WHERE and HAVING in a query with GROUP BY?",
+      "opts": [
+        "WHERE and HAVING are interchangeable.",
+        "WHERE filters rows before grouping; HAVING filters groups after aggregation.",
+        "HAVING filters rows before grouping; WHERE filters after.",
+        "WHERE works only with JOINs; HAVING works only with subqueries."
+      ],
+      "answer": 1,
+      "exp": "<strong>WHERE</strong> runs before GROUP BY — it filters individual rows from the raw table. <strong>HAVING</strong> runs after GROUP BY — it filters the resulting groups based on aggregate values.<br><br>Example:<br><code>SELECT category, COUNT(*) AS total FROM Books WHERE available = 1 GROUP BY category HAVING COUNT(*) > 5;</code><br><br>1. <code>WHERE available = 1</code> — only consider available books (row filter)<br>2. <code>GROUP BY category</code> — group the filtered rows<br>3. <code>HAVING COUNT(*) > 5</code> — only return categories with more than 5 available books (group filter)<br><br>You cannot use aggregate functions in WHERE — that's a common error. Always use HAVING for aggregate conditions."
+    }
+
+  ]
+}
