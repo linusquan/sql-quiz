@@ -349,12 +349,6 @@ const QUIZ_LIST = [
 
 function storageKey() { return 'sql-quiz-v1-' + QUIZ_FILE; }
 
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-}
 function saveState() {
   localStorage.setItem(storageKey(), JSON.stringify({
     state, order: SECS.map(s => s.qs)
@@ -650,7 +644,6 @@ function renderResults() {
 /* ─── Handlers ──────────────────────────────────────────────── */
 function startQuiz() {
   SECS = DATA.meta.sections.map(s => ({ ...s, qs: [...s.qs] }));
-  SECS.forEach(s => shuffle(s.qs));
   state = { screen: 'quiz', section: 0, answers: {} };
   saveState(); render(); scrollTo(0,0);
 }
