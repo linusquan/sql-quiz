@@ -1,0 +1,182 @@
+{
+  "meta": {
+    "title": "AWS Cloud Practitioner",
+    "subtitle": "Practice Exam · 10 Questions",
+    "sections": [
+      { "id": "concepts", "label": "Section 1 — Cloud Concepts",            "qs": [1, 6, 8] },
+      { "id": "security", "label": "Section 2 — Security & Compliance",     "qs": [0, 2, 3, 5, 7] },
+      { "id": "services", "label": "Section 3 — Technology & Services",     "qs": [4, 9] }
+    ]
+  },
+  "questions": [
+
+    {
+      "n": 1,
+      "section": "security",
+      "type": "mcq",
+      "tags": ["Security & Compliance", "MCQ"],
+      "text": "A company needs to transfer data between an Amazon S3 bucket and an on-premises application. Who is responsible for the security of this data, according to the AWS shared responsibility model?",
+      "opts": [
+        "The company",
+        "AWS",
+        "Firewall vendor",
+        "AWS Marketplace partner"
+      ],
+      "answer": 0,
+      "exp": "Under the <strong>Shared Responsibility Model</strong>, AWS secures the infrastructure (<em>security of the cloud</em>) while the customer is responsible for their data, encryption, and access controls (<em>security in the cloud</em>). Data transferred to/from S3 is customer data — the customer must configure HTTPS, bucket policies, and encryption."
+    },
+
+    {
+      "n": 2,
+      "section": "concepts",
+      "type": "mmcq",
+      "tags": ["Cloud Concepts", "Multi-Select"],
+      "text": "Which abilities are benefits of the AWS Cloud? (Select TWO.)",
+      "opts": [
+        "Trade variable expenses for capital expenses",
+        "Deploy globally in minutes",
+        "Plan capacity in advance of deployments",
+        "Take advantage of economies of scale",
+        "Reduce dependencies on network connectivity"
+      ],
+      "answer": [1, 3],
+      "selectN": 2,
+      "exp": "The actual benefit is <strong>trade CAPITAL expenses for VARIABLE expenses</strong> — option A is deliberately reversed. <strong>B</strong> and <strong>D</strong> are two of the six fundamental cloud advantages. <strong>C</strong> describes an on-premises constraint that cloud eliminates (<em>stop guessing capacity</em>). <strong>E</strong> is incorrect — cloud workloads require reliable connectivity."
+    },
+
+    {
+      "n": 3,
+      "section": "security",
+      "type": "mcq",
+      "tags": ["Security & Compliance", "MCQ"],
+      "text": "Which AWS service or feature provides log information of the inbound and outbound traffic on network interfaces in a VPC?",
+      "opts": [
+        "Amazon CloudWatch Logs",
+        "AWS CloudTrail",
+        "VPC Flow Logs",
+        "AWS Identity and Access Management (IAM)"
+      ],
+      "answer": 2,
+      "exp": "<strong>VPC Flow Logs</strong> captures IP traffic information — source/destination IPs, ports, protocols, and accept/reject status — on network interfaces in your VPC.<br><br><code>CloudWatch Logs</code> is a common destination for Flow Logs, not the capture mechanism itself. <code>CloudTrail</code> records AWS API calls. <code>IAM</code> manages permissions."
+    },
+
+    {
+      "n": 4,
+      "section": "security",
+      "type": "mcq",
+      "tags": ["Security & Compliance", "MCQ"],
+      "text": "Which AWS service enables users to check for vulnerabilities on Amazon EC2 instances by using predefined assessment templates?",
+      "opts": [
+        "AWS WAF",
+        "AWS Trusted Advisor",
+        "Amazon Inspector",
+        "AWS Shield"
+      ],
+      "answer": 2,
+      "exp": "<strong>Amazon Inspector</strong> performs automated vulnerability assessments on EC2 using predefined rules packages — CVEs, CIS benchmarks, and network reachability checks.<br><br><code>AWS WAF</code> filters HTTP/HTTPS web traffic. <code>Trusted Advisor</code> provides high-level best-practice recommendations. <code>Shield</code> is a DDoS protection service."
+    },
+
+    {
+      "n": 5,
+      "section": "services",
+      "type": "mmcq",
+      "tags": ["Technology & Services", "Multi-Select"],
+      "text": "A company wants to provide managed Windows virtual desktops and applications to its remote employees over secure network connections. Which AWS services can the company use to meet these requirements? (Select TWO.)",
+      "opts": [
+        "Amazon Connect",
+        "Amazon AppStream 2.0",
+        "Amazon WorkSpaces",
+        "AWS Site-to-Site VPN",
+        "Amazon Elastic Container Service (Amazon ECS)"
+      ],
+      "answer": [1, 2],
+      "selectN": 2,
+      "exp": "<strong>WorkSpaces</strong> provides full persistent virtual Windows/Linux desktops. <strong>AppStream 2.0</strong> streams individual Windows applications to users via a browser.<br><br><code>Amazon Connect</code> is a cloud contact center. <code>Site-to-Site VPN</code> provides network connectivity but is not a desktop/app delivery service. <code>ECS</code> orchestrates containers."
+    },
+
+    {
+      "n": 6,
+      "section": "security",
+      "type": "mcq",
+      "tags": ["Security & Compliance", "MCQ"],
+      "text": "A company is migrating its applications from on-premises to the AWS Cloud. The company wants to ensure that the applications are assigned only the minimum permissions that are needed to perform all operations. Which AWS service will meet these requirements?",
+      "opts": [
+        "AWS Identity and Access Management (IAM)",
+        "Amazon CloudWatch",
+        "Amazon Macie",
+        "Amazon GuardDuty"
+      ],
+      "answer": 0,
+      "exp": "<strong>IAM</strong> is the AWS service for managing who can do what — enforcing least privilege via IAM roles and policies attached to applications. Applications should use IAM roles (not hardcoded credentials).<br><br><code>CloudWatch</code> monitors metrics and logs. <code>Macie</code> discovers sensitive data in S3. <code>GuardDuty</code> detects threats from logs and network activity."
+    },
+
+    {
+      "n": 7,
+      "section": "concepts",
+      "type": "mcq",
+      "tags": ["Cloud Concepts", "MCQ"],
+      "text": "A company is planning to migrate its application to the AWS Cloud. Which AWS tool or set of resources should the company use to analyze and assess its readiness for migration?",
+      "opts": [
+        "AWS Cloud Adoption Framework (AWS CAF)",
+        "AWS Pricing Calculator",
+        "AWS Well-Architected Framework",
+        "AWS Budgets"
+      ],
+      "answer": 0,
+      "exp": "<strong>AWS CAF</strong> is specifically designed for migration readiness, assessing organizational capabilities across 6 perspectives: <em>Business, People, Governance, Platform, Security,</em> and <em>Operations</em>.<br><br>The <code>Well-Architected Framework</code> evaluates existing workload design quality — not migration readiness. <code>Pricing Calculator</code> estimates costs; <code>Budgets</code> monitors actual spend."
+    },
+
+    {
+      "n": 8,
+      "section": "security",
+      "type": "mmcq",
+      "tags": ["Security & Compliance", "Multi-Select"],
+      "text": "Which actions are best practices for an AWS account root user? (Select TWO.)",
+      "opts": [
+        "Share root user credentials with team members",
+        "Create multiple root users for the account, separated by environment",
+        "Enable multi-factor authentication (MFA) on the root user",
+        "Create an IAM user with administrator privileges for daily administrative tasks, instead of using the root user",
+        "Use programmatic access instead of the root user and password"
+      ],
+      "answer": [2, 3],
+      "selectN": 2,
+      "exp": "Enable <strong>MFA on root</strong> and use an <strong>IAM admin for daily tasks</strong>.<br><br>A = never share credentials. B = impossible — there is exactly <em>ONE</em> root user per AWS account. E = AWS explicitly recommends NOT creating root access keys — root access keys with full account access are extremely dangerous if leaked."
+    },
+
+    {
+      "n": 9,
+      "section": "concepts",
+      "type": "mmcq",
+      "tags": ["Cloud Concepts", "Multi-Select"],
+      "text": "Which capabilities are in the platform perspective of the AWS Cloud Adoption Framework (AWS CAF)? (Select TWO.)",
+      "opts": [
+        "Performance and capacity management",
+        "Data engineering",
+        "Continuous integration and continuous delivery (CI/CD)",
+        "Infrastructure protection",
+        "Change and release management"
+      ],
+      "answer": [1, 2],
+      "selectN": 2,
+      "exp": "<strong>Platform perspective</strong> = building the cloud platform: <em>data engineering</em> and <em>CI/CD</em> are core capabilities, along with platform architecture and engineering.<br><br><code>Performance &amp; capacity management</code> and <code>change &amp; release management</code> belong to the <strong>Operations</strong> perspective. <code>Infrastructure protection</code> belongs to the <strong>Security</strong> perspective."
+    },
+
+    {
+      "n": 10,
+      "section": "services",
+      "type": "mcq",
+      "tags": ["Technology & Services", "MCQ"],
+      "text": "A company wants to design a centralized storage system to manage the configuration data and passwords for its critical business applications. Which AWS service or capability will meet these requirements MOST cost-effectively?",
+      "opts": [
+        "AWS Systems Manager Parameter Store",
+        "AWS Secrets Manager",
+        "AWS Config",
+        "Amazon S3"
+      ],
+      "answer": 0,
+      "exp": "<strong>Parameter Store</strong> Standard tier is <em>FREE</em> for up to 10,000 parameters — making it the most cost-effective option for configuration data and passwords without automatic rotation.<br><br><code>Secrets Manager</code> costs $0.40/secret/month but adds built-in auto-rotation. <code>AWS Config</code> is for resource configuration compliance. <code>S3</code> is object storage and lacks built-in secrets management."
+    }
+
+  ]
+}
